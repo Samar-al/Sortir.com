@@ -18,9 +18,6 @@ class Location
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $street = null;
-
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
@@ -61,18 +58,6 @@ class Location
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getStreet(): ?string
-    {
-        return $this->street;
-    }
-
-    public function setStreet(string $street): static
-    {
-        $this->street = $street;
 
         return $this;
     }
