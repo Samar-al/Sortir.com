@@ -20,10 +20,14 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+                use_referer: true
             logout:
                 path: app_logout
                 # where to redirect after logout
                 # target: app_any_route
+            remember_me:
+                secret:   '%kernel.secret%' # required
+                lifetime: 604800 # 1 week in seconds    
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
