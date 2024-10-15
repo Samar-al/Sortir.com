@@ -1,0 +1,69 @@
+<form class="my-4" method="post" action="{{ path('app_main_index') }}" data-turbo="false">
+<div class="container-fluid search-form">
+    <div class="container1">
+        <fieldset>
+            <legend>Filtrer les sorties</legend>
+            <div class="row">
+            <div>
+            <label for="selectBase" class="form-label mt-4">Site</label>
+            <select class="form-select" id="selectBase" name="selectBase">
+            <option value=""> Site</option> <!-- Unselect option -->
+            {% for base in bases %}
+                <option>{{base.name}}</option>
+            {% endfor %}
+                
+            </select>
+            </div>
+            <div>
+                <label for="searchNameTrip" class="form-label mt-4">Le nom de la sortie contient :</label>
+                <input type="email" class="form-control" id="searchNameTrip" name="searchNameTrip">
+              
+            </div>
+            </div>
+            <div class="d-flex align-items-center m-3">
+            <span>Entre </span>
+                <div class="col-md-4"> 
+                    <input type="date" id="startDate" name="startDate" class="form-control">
+                </div>
+                <span> et </span>
+                <div class="col-md-4">
+                   
+                    <input type="date" id="endDate" name="endDate" class="form-control">
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="container2">
+            <fieldset>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="me-orga" name="me-orga" {% if app.request.get('me-orga') %}checked{% endif %}>
+                <label class="form-check-label" for="me-orga">
+                Sortie dont je suis l'Organisateur/trice
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="me-registered" name="me-registered" {% if app.request.get('me-registered') %}checked{% endif %}>
+                <label class="form-check-label" for="me-registered">
+                Sorties auxquelles je suis inscrit/e
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="me-not-registered" name="me-not-registered" {% if app.request.get('me-not-registered') %}checked{% endif %}>
+                <label class="form-check-label" for="me-not-registered">
+                Sorties auxquelles je ne suis pas inscrit/e
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="passed-trip" name="passed-trip" {% if app.request.get('passed-trip') %}checked{% endif %}>
+                <label class="form-check-label" for="passed-trip">
+                Sorties passées
+                </label>
+            </div>
+            
+            </fieldset>
+    </div>
+</div>
+<div class="text-center">
+    <button type="submit" class="btn btn-primary m-4">Submit</button>
+</div>
+</form>

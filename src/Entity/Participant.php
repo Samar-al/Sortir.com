@@ -71,6 +71,17 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
         $this->trips = new ArrayCollection();
         $this->organisedTrips = new ArrayCollection();
     }
+    public function __toString(): string
+    {
+         // Ensure both first name and last name are available
+        if ($this->firstname && $this->lastname) {
+            // Return the first name and the first letter of the last name, followed by a dot
+            return ucfirst($this->firstname) . ' ' . strtoupper($this->lastname[0]) . '.';
+        }
+
+        // Fallback in case one of the names is null
+        return $this->firstname ?: 'Unknown';
+    }
 
     public function getId(): ?int
     {

@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+ <link rel="stylesheet" href="{{asset('css/searchForm-style.css')}}">
+        {% endblock %}
+{% block title %}Hello MainController!{% endblock %}
+
+{% block body %}
+    {% include "fragments/_nav.html.twig" %}
+     {% if is_granted ('IS_AUTHENTICATED_FULLY') %}   
+       <div class="container-fluid d-flex justify-content-end">
+            <div class="col-3 p-3 homesquare shadow rounded bg-white my-4">
+                <p><strong>Participant</strong>: {{app.user}}</p>
+                <p><strong>Date du jour</strong>: {{ "now" | date('d/m/Y') }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% include "trip/_search-form.html.twig" %}
+    <div class="container-fluid">
+            <div class="row">
+                <div class="col-8 offset-2">
+                    <div class="table-wrapper">
+                        <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom de la sortie</th>
+                                        <th>Date de la sortie</th>
+                                        <th>Clôture</th>
+                                        <th>Inscrits/places</th>
+                                        <th>Etat</th>
+                                        <th>Inscrit</th>
+                                        <th>Organisateur</th>
+                                        <th>Action</th> 
+                                    </tr>
+                                </thead>
+                                <tbody class="table-active" id="trips-tbody">
+                                {% include 'main/_trips_tbody.html.twig' %}
+                              
+                                </tbody>
+                        </table>
+                    </div>    
+                </div>
+        </div>
+    </div>
+    {% block javascripts %}
+            <script src="{{asset('js/filter.js')}}"></script>
+        {% endblock %}
+{% endblock %}

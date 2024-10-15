@@ -1,0 +1,39 @@
+/* Remove flex-grow and add padding-right */
+.navbar-collapse {
+    flex-grow: 0 !important;  /* Remove flex-grow */
+    padding-right: 3rem !important;  /* Add padding-right */
+}
+
+.table-wrapper {
+    max-height: 400px; /* Set a maximum height for the table */
+    overflow-y: auto;  /* Enable vertical scroll */
+}
+
+.table-wrapper thead {
+    position: sticky;
+    top: 0;
+    background-color: white; /* Make sure the header stays visible */
+    z-index: 2;
+}
+
+.homesquare {
+    background: linear-gradient(135deg, #f8f9fa 30%, #e9ecef 100%);  /* Subtle background gradient */
+    border-radius: 10px;  /* Rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);  /* Soft shadow for depth */
+    padding: 20px;  /* Increase padding for more spacing inside */
+    color: #343a40;  /* Darker text color for readability */
+    font-family: 'Arial', sans-serif;  /* Clean, modern font */
+    font-size: 1rem;  /* Adjust font size */
+}
+
+.homesquare p {
+    margin-bottom: 10px;  /* Add some space between paragraphs */
+}
+
+.homesquare p span {
+    font-weight: bold;  /* Highlight the labels */
+}
+
+.homesquare p strong {
+    font-weight: bold;  /* Make participant and date stand out */
+}

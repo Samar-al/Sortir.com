@@ -1,0 +1,19 @@
+{% for trip in trips %}
+    <tr>
+        <td>{{ trip.name }}</td>
+        <td>{{ trip.dateHourStart|date('Y-m-d')}}</td>
+        <td>{{ trip.dateRegistrationLimit|date('Y-m-d')}}</td>
+        <td>{{ trip.participants|length }}/{{ trip.numMaxRegistration }}</td>
+        <td>{{ trip.state.label }}</td>
+        <td>{% if trip.organiser in trip.participants %}
+                X
+            {% endif %}
+        </td>
+        <td>{{ trip.organiser }}</td>
+        <td></td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="10">No records found</td>
+    </tr>
+{% endfor %}

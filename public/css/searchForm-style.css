@@ -1,0 +1,12 @@
+.container-fluid.search-form{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
+}
+
+@media screen and (max-width: 900px) {
+    .container-fluid.search-form{
+        flex-direction: column; 
+    }
+}
