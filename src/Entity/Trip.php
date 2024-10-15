@@ -61,6 +61,11 @@ class Trip
         $this->participants = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -212,4 +217,6 @@ class Trip
 
         return $this;
     }
+
+
 }
