@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participant - Gérer{% endblock %}
+
+{% block body %}
+    <h1>Gérer les participants</h1>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Prénom</th>
+            <th scope="col">Nom de famille</th>
+            <th scope="col">Email</th>
+            <th scope="col">Mot de passe</th>
+            <th scope="col">Numéro de téléphone</th>
+            <th scope="col">Admin</th>
+            <th scope="col">Actif</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for profile in profiles %}
+
+            <tr class="table-primary">
+                <td>{{ profile.id }}</td>
+                <td>{{ profile.firstname }}</td>
+                <td>{{ profile.lastname }}</td>
+                <td>{{ profile.mail }}</td>
+                <td>{{ profile.password }}</td>
+                <td>{{ profile.phoneNumber }}</td>
+                <td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
+                <td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
+                <td>
+                    <a class="btn btn-primary" href="{{ path('app_profile_edit', {'id': profile.id}) }}">Modifier</a>
+                    <a class="btn btn-primary" href="{{ path('app_profile_delete', {'id': profile.id}) }}">Supprimer</a>
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a class="btn btn-primary" href="{{ path('app_profile_new') }}">Créer participant</a>
+{% endblock %}

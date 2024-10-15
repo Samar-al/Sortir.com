@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/profile-css.css') }}">{% endblock %}
+{% block body %}
+{#    <div class="row mt-4 text-center">#}
+{#        {% if app.user.profile and app.user.profile.photo %}#}
+{#            <img class="my-profile-photo" alt="profile picture" src="{{ asset('uploads/'~app.user.profile.photo) }}" >#}
+{#        {% else  %}#}
+{#            <i class="fa-regular fa-user"></i> {{ app.user.username }}#}
+{#        {% endif %}#}
+{#    </div>#}
+    <div class="row mt-2 text-center">
+        <h1>Mon profil</h1>
+    </div>
+
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-lg-6 mb-4 mb-lg-0">
+                <div class="card mb-3" style="border-radius: .5rem;">
+                    <div class="row g-0">
+                        <div class="col-md-4 gradient-custom text-center text-white"
+                             style="border-top-left-radius: .5rem; border-bottom-left-radius: .5rem;">
+
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                                 alt="Avatar" class="img-fluid my-5" style="width: 80px;" />
+
+                            <h5>{{ profile.firstname }} {{ profile.lastname }}</h5>
+                            <i class="far fa-edit mb-5"></i>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body p-4">
+                                <h6>Information</h6>
+                                <hr class="mt-0 mb-4">
+                                <div class="row pt-1">
+                                    <div class="col-6 mb-3">
+                                        <h6>Email</h6>
+                                        <p class="text-muted">{{ profile.mail }}</p>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6>Numéro de téléphone</h6>
+                                        <p class="text-muted">{{ profile.phoneNumber }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row pt-1">
+                                    <div class="col-6 mb-3">
+                                        <h6>Site de rattachement</h6>
+                                        <p class="text-muted">{{ profile.base.name }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row pt-1">
+                                    <a class="btn btn-primary" href="{{ path('app_profile_edit', {'id': profile.id}) }}">Modifier</a>
+                                </div>
+{#                                <div class="row pt-1">#}
+{#                                    {{ include('profile/_delete_form.html.twig') }}#}
+{#                                </div>#}
+{#                                    <a class="btn btn-primary" href="{{ path('app_profile_delete', {'id': profile.id}) }}">Supprimer mon compte</a>#}
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
