@@ -5,6 +5,7 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/profile-css.css') }}">{% endblock %}
 {% block body %}
+{% include "fragments/_nav.html.twig" %}
 {#    <div class="row mt-4 text-center">#}
 {#        {% if app.user.profile and app.user.profile.photo %}#}
 {#            <img class="my-profile-photo" alt="profile picture" src="{{ asset('uploads/'~app.user.profile.photo) }}" >#}

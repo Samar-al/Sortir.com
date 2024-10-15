@@ -27,7 +27,7 @@
                 <a class="nav-link {% if "post" in app.request.get("_route") %} active {% endif %}" href="{{path('app_main_index')}}"><i class="bi bi-megaphone"></i> Accueil</a>
                 </li>
                 <li class="nav-item">
-                <a class="nav-link {% if "tag" in app.request.get("_route") %} active {% endif %}" href="#"><i class="bi bi-list-check"></i> Mon Profil</a>
+                <a class="nav-link {% if "tag" in app.request.get("_route") %} active {% endif %}" href="{{path('app_profile_show',{'id': app.user.id} )}}"><i class="bi bi-list-check"></i> Mon Profil</a>
                 </li>
                 </li>
                  <li class="nav-item">
