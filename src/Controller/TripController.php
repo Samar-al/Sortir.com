@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Trip;
+use App\Repository\StateRepository;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -71,6 +72,28 @@ class TripController extends AbstractController
          $entityManager->flush();
      
          $this->addFlash('success', 'Vous êtes bien désinscrit de la sortie');
+         return $this->redirectToRoute('app_main_index');
+
+    }
+
+    #[Route('/trip/{id}/publier', name: 'app_trip_publish', methods: ['GET'])]
+    public function publishTrip(Trip $trip, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if($trip->getOrganiser() !== $user) {
+            $this->addFlash('warning', 'Vous n\'êtes pas l\'organisateur de cette sortie');
+            return $this->redirectToRoute('app_main_index');
+        }
+
+        if ($trip->getState()->getLabel() !== 'created') {
+            $this->addFlash('warning', 'Vous ne pouvez pas publier cette sortie');
+            return $this->redirectToRoute('app_main_index');
+        }
+        $openState = $stateRepository->findOneBy(['label' => "open"]);
+        $trip->setState($openState);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Votre sortie à été publiée avec succès');
          return $this->redirectToRoute('app_main_index');
 
     }

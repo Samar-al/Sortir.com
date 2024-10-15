@@ -1,8 +1,8 @@
 {% for trip in trips %}
     <tr>
         <td>{{ trip.name }}</td>
-        <td>{{ trip.dateHourStart|date('Y-m-d')}}</td>
-        <td>{{ trip.dateRegistrationLimit|date('Y-m-d')}}</td>
+        <td>{{ trip.dateHourStart|date('d/m/Y H:i')}}</td>
+        <td>{{ trip.dateRegistrationLimit|date('d/m/Y H:i')}}</td>
         <td>{{ trip.participants|length }}/{{ trip.numMaxRegistration }}</td>
         <td>{{ trip.state.label }}</td>
         <td>{% if trip.organiser in trip.participants %}
@@ -16,7 +16,7 @@
             {% endif %}
             {% if trip.state.label == 'created' and trip.organiser == app.user %}
                 <a href="{# {{ path('app_trip_edit', {id: trip.id}) }} #}" >Modifier</a>
-                <a href="{# {{ path('app_trip_publish', {id: trip.id}) }} #}" >Publier</a>
+                <a href="{{ path('app_trip_publish', {id: trip.id}) }}" >Publier</a>
             {% endif %}
 
             {% if not trip.participants.contains(app.user) 
