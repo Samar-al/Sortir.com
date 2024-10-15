@@ -3,40 +3,45 @@
 {% block title %}Trip{% endblock %}
 
 {% block body %}
-    <h1>Trip</h1>
+ {% include "fragments/_nav.html.twig" %}
+<div class="row justify-content-center my-4">
+    <div class="col-8">
+            <h1>Sortie</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ trip.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ trip.name }}</td>
-            </tr>
-            <tr>
-                <th>DateHourStart</th>
-                <td>{{ trip.dateHourStart ? trip.dateHourStart|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Duration</th>
-                <td>{{ trip.duration }}</td>
-            </tr>
-            <tr>
-                <th>DateRegistrationLimit</th>
-                <td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>NumMaxRegistration</th>
-                <td>{{ trip.numMaxRegistration }}</td>
-            </tr>
-            <tr>
-                <th>TripDetails</th>
-                <td>{{ trip.tripDetails }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Id</th>
+                        <td>{{ trip.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ trip.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date et heure de la sortie</th>
+                        <td>{{ trip.dateHourStart ? trip.dateHourStart|date('Y-m-d H:i:s') : '' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Duration</th>
+                        <td>{{ trip.duration }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date limite d'inscription</th>
+                        <td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('Y-m-d H:i:s') : '' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre de places</th>
+                        <td>{{ trip.numMaxRegistration }}</td>
+                    </tr>
+                    <tr>
+                        <th>Détails de la sortie</th>
+                        <td>{{ trip.tripDetails }}</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+</div>
 
     <a href="{{ path('app_trip_index') }}">back to list</a>
 

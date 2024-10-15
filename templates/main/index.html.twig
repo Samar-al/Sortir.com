@@ -14,9 +14,14 @@
             </div>
         </div>
     {% endif %}
-
+    <div class="row">
+        <div class="col-6 offset-3">
+            {% include "fragments/_flash_message.html.twig" %}
+        </div>
+    </div>
+        
     {% include "trip/_search-form.html.twig" %}
-    <div class="container-fluid">
+    <div class="container-fluid p-3">
             <div class="row">
                 <div class="col-8 offset-2">
                     <div class="table-wrapper">

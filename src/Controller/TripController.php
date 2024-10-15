@@ -2,29 +2,26 @@
 
 namespace App\Controller;
 
+use App\Entity\City;
+use App\Entity\Location;
 use App\Entity\Trip;
 use App\Form\TripType;
 use App\Repository\CityRepository;
+use App\Repository\StateRepository;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/trip')]
+#[Route('/sortie')]
 final class TripController extends AbstractController
 {
 
-    #[Route(name: '/', methods: ['GET'])]
-    public function indexHome(): Response
-    {
-        return $this->render('trip/index.html.twig', [
-            'controllerName' => 'TripController',
-        ]);
-    }
-
-    #[Route(name: 'app_trip_index', methods: ['GET'])]
+    #[Route('/', name: 'app_trip_index', methods: ['GET'])]
     public function index(TripRepository $tripRepository): Response
     {
         return $this->render('trip/index.html.twig', [
@@ -32,10 +29,17 @@ final class TripController extends AbstractController
         ]);
     }
 
-    #[Route('/create', name: 'app_trip_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, CityRepository $cityRepository): Response
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/ajouter', name: 'app_trip_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
+
         $trip = new Trip();
+        // Set the default state where label is 'created'
+        $defaultState = $stateRepository->findOneBy(['label' => 'created']);
+        if ($defaultState) {
+            $trip->setState($defaultState);
+        }
         $formTrip = $this->createForm(TripType::class, $trip);
         $formTrip->handleRequest($request);
 
@@ -43,11 +47,17 @@ final class TripController extends AbstractController
 
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
 
-            $trip->getLocation()->setCity($request->get('city'));
+            $cityId = $request->request->get('city');
+            $city = $cityRepository->find($cityId);
 
+            if ($city) {
+                // Set the city on the location of the trip
+                $trip->getLocation()->setCity($city);
+            }
+            $trip->setOrganiser($this->getUser());
             $entityManager->persist($trip);
             $entityManager->flush();
-
+            $this->addFlash('success', 'Vous avez ajouté une sortie avec succès !');
             return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -94,4 +104,6 @@ final class TripController extends AbstractController
 
         return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
     }
+
+   
 }

@@ -1,42 +1,48 @@
-{#{{ form_start(formTrip) }}#}
-{#<div class="container">#}
-{#    <div class="row">#}
-{#        <div class="col">#}
-{#            {{ form_row(formTrip.name) }}#}
-{#            {{ form_row(formTrip.dateHourStart) }}#}
-{#            {{ form_row(formTrip.dateRegistrationLimit) }}#}
-{#            {{ form_row(formTrip.numMaxRegistration) }}#}
-{#            {{ form_row(formTrip.duration, { 'label': 'Durée', 'attr': {'placeholder': 'En minutes'} }) }}#}
-{#            {{ form_row(formTrip.tripDetails) }}#}
-{#        </div>#}
-{#        <div class="col">#}
-{#            {{ form_row(formTrip.base) }}#}
-{#            {{ form_row(formTrip.location) }}#}
+{{ form_start(formTrip) }}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{ form_row(formTrip.name) }}
+            {{ form_row(formTrip.dateHourStart) }}
+            {{ form_row(formTrip.dateRegistrationLimit) }}
+            {{ form_row(formTrip.numMaxRegistration) }}
+            {{ form_row(formTrip.duration, { 'label': 'Durée', 'attr': {'placeholder': 'En heures'} }) }}
+            {{ form_row(formTrip.tripDetails) }}
+        </div>
+        <div class="col">
+            {{ form_row(formTrip.base) }}
+            {{ form_row(formTrip.location) }}
 
-{#            <label class="form-label mt-4" for="city">Ville organisateur</label>#}
-{#            <select class="form-select" type="text" id="city">#}
-{#                {% for city in cities %}#}
-{#                    <option value="{{ city.id }}">{{ city.name }}</option>#}
-{#                {% endfor %}#}
-{#            </select>#}
+            {# Ville organisateur (City selection) #}
+            <label class="form-label mt-4" for="city">Ville</label>
+            <select class="form-select" type="text" id="city" name="city">
+                <option value="">-- Séléctionner la ville --</option> <!-- Deselect option -->
+                {% for city in cities %}
+                    <option value="{{ city.id }}">{{ city.name }}</option>
+                {% endfor %}
+            </select>
 
-{#            <p>Rue : {{ formTrip.location.vars.data ? formTrip.location.vars.data.streetName : 'Aucune rue' }}</p>#}
-{#            <p>Code postal : {{ formTrip.location.vars.data ? formTrip.location.vars.data.ZipCode : 'Aucun code postal' }}</p>#}
+            {# Rue and Code Postal fields (populated by JavaScript) #}
+            <p class="streetName">Rue: Not available</p>
+            <p class="postalCode">Code postal: Not available</p>
 
-{#            <label class="form-label mt-4" for="latitude">Latitude</label>#}
-{#            <input class="form-control" readonly type="text" name="latitude" id="latitude" value="{{ formTrip.location.latitude }}"></input>#}
+            {# Latitude and Longitude fields (populated by JavaScript) #}
+            <label class="form-label mt-4" for="latitude">Latitude</label>
+            <input class="form-control" readonly type="text" name="latitude" id="latitude" value="{{ trip.location ? trip.location.latitude : '' }}" placeholder="Latitude not available">
 
-{#            <label class="form-label mt-4" for="longitude">Longitude</label>#}
-{#            <input class="form-control" readonly type="text" name="longitude" id="longitude"></input>#}
-{#        </div>#}
-{#    </div>#}
+            <label class="form-label mt-4" for="longitude">Longitude</label>
+            <input class="form-control" readonly type="text" name="longitude" id="longitude" value="{{ trip.location ? trip.location.longitude : '' }}" placeholder="Longitude not available">
 
-{#    <div class="row">#}
-{#        <div class="col">#}
-{#            <button type="submit" class="btn btn-primary">Enregistrer</button>#}
-{#            <button type="submit" class="btn btn-primary">Publier la sortie</button>#}
-{#            <button type="button" class="btn btn-secondary">Annuler</button>#}
-{#        </div>#}
-{#    </div>#}
-{#</div>#}
-{#{{ form_end(formTrip) }}#}
+        </div>
+    </div>
+    {# Submit Button Section #}
+    <div class="row mt-4">
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>    
+        </div>
+        <div class="col">
+            <button type="reset" class="btn btn-secondary">Réinitialiser</button> <!-- Optional reset button -->
+        </div>
+    </div>
+</div>
+{{ form_end(formTrip) }}
