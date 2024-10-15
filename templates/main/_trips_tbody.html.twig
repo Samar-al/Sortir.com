@@ -11,8 +11,27 @@
         </td>
         <td><a href="{{path('app_profile_show',{'id': trip.organiser.id} )}}">{{ trip.organiser }}</a></td>
          <td>
-            {#  <a class="btn btn-success" href="{{ path('app_back_movie_show', {'id': movie.id}) }}"><i class="bi bi-eye"></i></a>
-            <a class="btn btn-warning" href="{{ path('app_back_movie_edit', {'id': movie.id}) }}"><i class="bi bi-pencil"></i></a> #}
+            {% if trip.state.label != 'created' %}
+                <a href="{# {{ path('app_trip_show', {id: trip.id}) }} #}" >Afficher</a>
+            {% endif %}
+            {% if trip.state.label == 'created' and trip.organiser == app.user %}
+                <a href="{# {{ path('app_trip_edit', {id: trip.id}) }} #}" >Modifier</a>
+                <a href="{# {{ path('app_trip_publish', {id: trip.id}) }} #}" >Publier</a>
+            {% endif %}
+
+            {% if not trip.participants.contains(app.user) 
+                and trip.dateRegistrationLimit > "now" | date('Y-m-d')
+                and trip.participants|length < trip.numMaxRegistration
+                and trip.state.label == 'open' %}
+              <form method="post" action="{{ path('app_trip_register', {id: trip.id}) }}" style="display: inline;">
+                <button type="submit" class="button-link">S'inscrire</button>
+              </form>
+            {% endif %}
+            {% if trip.participants.contains(app.user) and (trip.state.label == 'open' or trip.state.label == 'closed') %}
+                <form method="post" action="{{ path('app_trip_unregister', {id: trip.id}) }}" style="display: inline;">
+                    <button type="submit" class="button-link">Se désinscrire</button>
+                </form>
+            {% endif %}
         </td>
     </tr>
 {% else %}
