@@ -1,0 +1,42 @@
+{#{{ form_start(formTrip) }}#}
+{#<div class="container">#}
+{#    <div class="row">#}
+{#        <div class="col">#}
+{#            {{ form_row(formTrip.name) }}#}
+{#            {{ form_row(formTrip.dateHourStart) }}#}
+{#            {{ form_row(formTrip.dateRegistrationLimit) }}#}
+{#            {{ form_row(formTrip.numMaxRegistration) }}#}
+{#            {{ form_row(formTrip.duration, { 'label': 'Durée', 'attr': {'placeholder': 'En minutes'} }) }}#}
+{#            {{ form_row(formTrip.tripDetails) }}#}
+{#        </div>#}
+{#        <div class="col">#}
+{#            {{ form_row(formTrip.base) }}#}
+{#            {{ form_row(formTrip.location) }}#}
+
+{#            <label class="form-label mt-4" for="city">Ville organisateur</label>#}
+{#            <select class="form-select" type="text" id="city">#}
+{#                {% for city in cities %}#}
+{#                    <option value="{{ city.id }}">{{ city.name }}</option>#}
+{#                {% endfor %}#}
+{#            </select>#}
+
+{#            <p>Rue : {{ formTrip.location.vars.data ? formTrip.location.vars.data.streetName : 'Aucune rue' }}</p>#}
+{#            <p>Code postal : {{ formTrip.location.vars.data ? formTrip.location.vars.data.ZipCode : 'Aucun code postal' }}</p>#}
+
+{#            <label class="form-label mt-4" for="latitude">Latitude</label>#}
+{#            <input class="form-control" readonly type="text" name="latitude" id="latitude" value="{{ formTrip.location.latitude }}"></input>#}
+
+{#            <label class="form-label mt-4" for="longitude">Longitude</label>#}
+{#            <input class="form-control" readonly type="text" name="longitude" id="longitude"></input>#}
+{#        </div>#}
+{#    </div>#}
+
+{#    <div class="row">#}
+{#        <div class="col">#}
+{#            <button type="submit" class="btn btn-primary">Enregistrer</button>#}
+{#            <button type="submit" class="btn btn-primary">Publier la sortie</button>#}
+{#            <button type="button" class="btn btn-secondary">Annuler</button>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{{ form_end(formTrip) }}#}

@@ -1,43 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello TripController!{% endblock %}
+{% block title %}Trip index{% endblock %}
 
 {% block body %}
-<div class="container-fluid">
+    <h1>Trip index</h1>
+
     <table class="table">
-            <thead>
-                <tr>
-                    <th>Nom de la sortie</th>
-                    <th>Date de la sortie</th>
-                    <th>Clôture</th>
-                    <th>Inscrits/places</th>
-                    <th>Etat</th>
-                    <th>Inscrit</th>
-                    <th>Organisateur</th>
-                    <th>Action</th> 
-                </tr>
-            </thead>
-            <tbody>
-            {% for trip in trips %}
-                <tr>
-                    <td>{{ trip.name }}</td>
-                    <td>{{ trip.dateHourStart|date('Y-m-d') : '' }}</td>
-                    <td>{{ trip.dateRegistrationLimit|date('Y-m-d') : ''  }}</td>
-                    <td>{{ trip.numMaxRegistration}}</td>
-                    <td>{{ trip.state}}</td>
-                    <td>am I registered</td>
-                    <td>{{ trip->getOrganiser()}}</td>
-                    <td>
-                       {#  <a class="btn btn-success" href="{{ path('app_back_movie_show', {'id': movie.id}) }}"><i class="bi bi-eye"></i></a>
-                        <a class="btn btn-warning" href="{{ path('app_back_movie_edit', {'id': movie.id}) }}"><i class="bi bi-pencil"></i></a> #}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="10">no records found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-</div>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>DateHourStart</th>
+                <th>Duration</th>
+                <th>DateRegistrationLimit</th>
+                <th>NumMaxRegistration</th>
+                <th>TripDetails</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for trip in trips %}
+            <tr>
+                <td>{{ trip.id }}</td>
+                <td>{{ trip.name }}</td>
+                <td>{{ trip.dateHourStart ? trip.dateHourStart|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ trip.duration }}</td>
+                <td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ trip.numMaxRegistration }}</td>
+                <td>{{ trip.tripDetails }}</td>
+                <td>
+                    <a href="{{ path('app_trip_show', {'id': trip.id}) }}">show</a>
+                    <a href="{{ path('app_trip_edit', {'id': trip.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_trip_new') }}">Create new</a>
 {% endblock %}
