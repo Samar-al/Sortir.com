@@ -7,10 +7,15 @@ use App\Form\ParticipantType;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+use function PHPUnit\Framework\throwException;
 
 #[Route('/profile')]
 final class ProfileController extends AbstractController
@@ -31,7 +36,7 @@ final class ProfileController extends AbstractController
         $profile = new Participant();
         $formProfile = $this->createForm(ParticipantType::class, $profile);
         $formProfile->handleRequest($request);
-//        if ($this->isGranted("ROLE_ADMIN")) {
+        if ($this->isGranted("ROLE_ADMIN")) {
             if ($formProfile->isSubmitted() && $formProfile->isValid()) {
 
                 $plainPassword = $formProfile->get('plainPassword')->getData();
@@ -44,10 +49,10 @@ final class ProfileController extends AbstractController
 
                 return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
             }
-//        }
-//        else {
-//            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
-//        }
+        }
+       else {
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
 
 
         return $this->render('profile/new.html.twig', [
@@ -59,16 +64,22 @@ final class ProfileController extends AbstractController
     #[Route('/{id}', name: 'app_profile_show', methods: ['GET'])]
     public function show(Participant $profile): Response
     {
-        $form = $this->createForm(ParticipantType::class, $profile);
-
         return $this->render('profile/show.html.twig', [
             'profile' => $profile,
         ]);
     }
 
+  
     #[Route('/edit/{id}', name: 'app_profile_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function edit(Request $request, Participant $profile, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        // Check if the user is either the owner of the profile or has ROLE_ADMIN
+        if ($user !== $profile && !$this->isGranted('ROLE_ADMIN')) {
+            // If not, deny access
+            throw new ExceptionAccessDeniedException('You do not have permission to edit this profile.');
+        }
         $formProfileEdit = $this->createForm(ParticipantType::class, $profile, ['is_edit' => true]);
         $formProfileEdit->handleRequest($request);
 
@@ -77,7 +88,7 @@ final class ProfileController extends AbstractController
                     $idProfile = $profile->getId();
 
                     $entityManager->flush();
-//                    $this->addFlash("success","Profil mis à jour!");
+                    $this->addFlash("success","Profil mis à jour!");
                     return $this->redirectToRoute('app_profile_show', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
 
         }
