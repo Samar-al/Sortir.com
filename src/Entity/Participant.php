@@ -66,6 +66,8 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->isAdmin  = false;
+        $this->isActive  = false;
         $this->trips = new ArrayCollection();
         $this->organisedTrips = new ArrayCollection();
     }

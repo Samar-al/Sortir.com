@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participant - Créer{% endblock %}
+
+{% block body %}
+
+<div class="row my-4">
+    <div class="col-6 offset-3">
+        <h1>Créer nouveau participant</h1>
+        <a class="btn btn-primary" href="{{ path('app_profile_index') }}">Retour à la liste</a>
+    </div>
+</div>
+
+<div class="row my-4">
+    <div class="col-6 offset-3">
+        <div class="row m-3 col-3"></div>
+    {{ include('profile/_form.html.twig') }}
+    </div>
+</div>
+
+{% endblock %}

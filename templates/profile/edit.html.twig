@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+    <div class="row m-3 justify-content-center">
+        <h1>Modifier mon profil</h1>
+    </div>
+
+<div class="row my-4">
+    <div class="col-6 offset-3">
+        <div class="row m-3 col-3"></div>
+        {{ include('profile/_form.html.twig', {'button_label': 'Enregistrer'}) }}
+    </div>
+</div>
+{#    <a href="{{ path('app_profile_index') }}">back to list</a>#}
+
+{#    {{ include('profile/_delete_form.html.twig') }}#}
+{% endblock %}
