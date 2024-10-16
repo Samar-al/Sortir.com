@@ -48,6 +48,10 @@ final class ProfileController extends AbstractController
                 $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
                 $profile->setPassword($hashedPassword);
 
+                // Persist the profile first to get the ID
+                $entityManager->persist($profile);
+                $entityManager->flush(); // This will generate the ID for the participant
+
                 $photoFile = $formProfile->get('photo')->getData();
                 if ($photoFile) {
                     // Guess the extension dynamically
@@ -65,14 +69,13 @@ final class ProfileController extends AbstractController
                     // Store the filename in the session or pass it to the template
                 }
                  
-
-                $entityManager->persist($profile);
-                $entityManager->flush();
-
+                // Success flash message for file upload
+                $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
                 return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
             }
         }
        else {
+            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à créer des participants');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
