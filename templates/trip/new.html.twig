@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sortie - Créer{% endblock %}
+
+{% block body %}
+ {% include "fragments/_nav.html.twig" %}
+    <h1 class="text-center">Créer nouvelle sortie</h1>
+
+<div class="row my-4">
+    <div class="col-6 offset-3">
+    {{ include('trip/_form.html.twig') }}
+    </div>
+</div>
+
+{% block javascripts %}
+            <script src="{{asset('js/tripCreation.js')}}"></script>
+        {% endblock %}
+{% endblock %}
