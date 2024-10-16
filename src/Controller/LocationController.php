@@ -20,6 +20,7 @@ class LocationController extends AbstractController
             'longitude' => $location->getLongitude(),
             'zipCode' => $location->getCity()->getZipCode(),
             'cityId' => $location->getCity()->getId(),
+            'cityName'=> $location->getCity()->getName(),
         ]);
     }
     
