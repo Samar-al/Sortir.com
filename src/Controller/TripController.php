@@ -131,15 +131,19 @@ final class TripController extends AbstractController
     {
 
         if($this->getUser()!=$trip->getOrganiser() && !$this->isGranted("ROLE_MODERATOR") ){
-            return $this->json(sprintf('{"msg":"You can not delete this trip, not yours!","code":false}'),Response::HTTP_FORBIDDEN);
+            $this->addFlash("danger", "Vous ne pouvez pas supprimer cette sortie, vous n'en êtes pas l'auteur!");
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
         if (!$this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
-            return  $this->json(sprintf('{"msg":"CSRF token not valid!","code":false}'),Response::HTTP_FORBIDDEN);
+            $this->addFlash("danger", "CSRF token n'est pas valide!");
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
+
         $entityManager->remove($trip);
         $entityManager->flush();
-        return $this->json(sprintf('{"msg":"Trip deleted","code":true}'),Response::HTTP_ACCEPTED);
+        $this->addFlash("success", "Vous avez supprimé une sortie avec succès !");
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
 
 //        if ($this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
 //            $entityManager->remove($trip);
