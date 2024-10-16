@@ -15,7 +15,7 @@
 
             {# Ville organisateur (City selection) #}
             <label class="form-label mt-4" for="city">Ville</label>
-            <select class="form-select" type="text" id="city" name="city" disabled>
+            <select class="form-select" type="text" id="city" name="city" readonly>
                 <option value="">-- Séléctionner la ville --</option> <!-- Deselect option -->
                 {% for city in cities %}
                     <option value="{{ city.id }}">{{ city.name }}</option>
