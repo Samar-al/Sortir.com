@@ -56,6 +56,12 @@ class Trip
     #[ORM\JoinColumn(nullable: false)]
     private ?Participant $organiser = null;
 
+    #[ORM\Column]
+    private ?bool $isArchived = false;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $reasonCancel = null;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -214,6 +220,30 @@ class Trip
     public function setOrganiser(?Participant $organiser): static
     {
         $this->organiser = $organiser;
+
+        return $this;
+    }
+
+    public function isArchived(): ?bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setArchived(bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function getReasonCancel(): ?string
+    {
+        return $this->reasonCancel;
+    }
+
+    public function setReasonCancel(?string $reasonCancel): static
+    {
+        $this->reasonCancel = $reasonCancel;
 
         return $this;
     }
