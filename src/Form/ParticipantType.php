@@ -24,10 +24,50 @@ class ParticipantType extends AbstractType
             ->add('username', TextType::class, ['label' =>'Nom d\'utilisateur'])
             ->add('firstname', TextType::class, ['label' =>'Prénom'])
             ->add('lastname', TextType::class, ['label' =>'Nom'])
-            ->add('phoneNumber', TextType::class, ['label'=>'Numéro de téléphone'])
-            ->add('mail', EmailType::class, ['label' =>'Adresse mail'])
-//            ->add('plainPassword',PasswordType::class,["mapped"=>false,"label"=>"Mot de passe","required"=>false])
-//            ->add('confirmPassword',PasswordType::class,["mapped"=>false,"label"=>"Confirmation", "required"=>false])
+            ->add('phoneNumber', TextType::class, [
+                'label'=>'Numéro de téléphone',
+                'required' =>false
+            ])
+            ->add('mail', EmailType::class, ['label' =>'Adresse mail']);
+
+        if ($options['is_edit']=== true) {
+            $builder
+                ->add('currentPassword', PasswordType::class, [
+                    "mapped" => false,
+                    "label" => "Mot de passe actuel",
+                    "required" => true,
+                ])
+                ->add('plainPassword', PasswordType::class, [
+                    "mapped" => false,
+                    "label" => "Nouveau mot de passe",
+                    "required" => false,
+                ])
+                ->add('confirmPassword', PasswordType::class, [
+                    "mapped" => false,
+                    "label" => "Confirmez nouveau mot de passe",
+                    "required" => false,
+                ]);
+
+        } else {
+            $builder
+                ->add('plainPassword', PasswordType::class, [
+                    "mapped" => false,
+                    "label" => "Mot de passe",
+                    "required" => false,
+                ])
+                ->add('confirmPassword', PasswordType::class, [
+                    "mapped" => false,
+                    "label" => "Confirmez mot de passe",
+                    "required" => false,
+                ]);
+        }
+
+        $builder
+            ->add('base', EntityType::class, [
+                'label' => 'Site de rattachement',
+                'class' => Base::class,
+                'choice_label' => 'name',
+            ])
             ->add('photo',FileType::class,[
                 'label'=> "Ma photo (image* jpg,png...)",
                 'mapped' => false,
@@ -45,25 +85,6 @@ class ParticipantType extends AbstractType
                     'accept'=>'image/*'
                 ]
             ]);
-            if ($options['is_edit'] === false) {
-                $builder
-                    ->add('plainPassword', PasswordType::class, [
-                        "mapped" => false,
-                        "label" => "Mot de passe",
-                        "required" => true,
-                    ])
-                    ->add('confirmPassword', PasswordType::class, [
-                        "mapped" => false,
-                        "label" => "Confirmation",
-                        "required" => true,
-                    ])
-                    ->add('base', EntityType::class, [
-                    'label' => 'Site de rattachement',
-                    'class' => Base::class,
-                    'choice_label' => 'name',
-                    ]);
-            }
-
     }
 
     public function configureOptions(OptionsResolver $resolver): void
