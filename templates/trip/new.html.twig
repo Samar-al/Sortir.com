@@ -5,7 +5,7 @@
 {% block body %}
  {% include "fragments/_nav.html.twig" %}
     <h1 class="text-center">Créer nouvelle sortie</h1>
-
+{% include "fragments/_flash_message.html.twig" %}
 <div class="row my-4">
     <div class="col-6 offset-3">
     {{ include('trip/_form.html.twig') }}

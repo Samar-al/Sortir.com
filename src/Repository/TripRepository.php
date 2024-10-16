@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\State;
 use App\Entity\Trip;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -75,7 +76,22 @@ class TripRepository extends ServiceEntityRepository
     
         return $queryBuilder->getQuery()->getResult();
     }
-    
+
+    public function findTripsNeedingStatusUpdate()
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.isArchived = 0')  // Ensure only non-archived trips are fetched
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findStateByLabel(string $label)
+    {
+        return $this->getEntityManager()
+            ->getRepository(State::class)
+            ->findOneBy(['label' => $label]);
+    }
+        
 
 
     //    /**

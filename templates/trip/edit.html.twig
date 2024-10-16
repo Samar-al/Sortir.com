@@ -9,8 +9,10 @@
 
 {#    <a href="{{ path('app_trip_index') }}">back to list</a>#}
 
-    {{ include('trip/_delete_form.html.twig') }}
-
+    
+    <div class="col text-start">
+            {{ include('trip/_delete_form.html.twig') }}
+    </div>
     {% block javascripts %}
         <script src="{{asset('js/tripCreation.js')}}"></script>
     {% endblock %}
