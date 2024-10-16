@@ -13,15 +13,15 @@
             {{ form_row(formTrip.base) }}
             {{ form_row(formTrip.location) }}
 
-            {# Ville organisateur (City selection) #}
-            <label class="form-label mt-4" for="city">Ville</label>
-            <select class="form-select" type="text" id="city" name="city" readonly>
-                <option value="">-- Séléctionner la ville --</option> <!-- Deselect option -->
-                {% for city in cities %}
-                    <option value="{{ city.id }}">{{ city.name }}</option>
-                {% endfor %}
-            </select>
+           {# City name input (always visible) #}
+            <label class="form-label mt-4" for="city_name">Ville</label>
+            <input class="form-control" readonly type="text" name="city_name" id="city_name" value="" placeholder="Sélectionner la ville">
 
+            {# Hidden input to store and submit the city ID #}
+            <input type="hidden" name="city" id="city_hidden" value="">
+            
+
+       
             {# Rue and Code Postal fields (populated by JavaScript) #}
             <p class="streetName">Rue: Not available</p>
             <p class="postalCode">Code postal: Not available</p>

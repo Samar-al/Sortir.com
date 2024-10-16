@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sortie - Annuler{% endblock %}
+
+{% block body %}
+ {% include "fragments/_nav.html.twig" %}
+    {{ include('fragments/_flash_message.html.twig') }}
+   <div class="container my-5">
+    <h1 class="text-center mb-4">Annuler la sortie: {{ trip.name }}</h1>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h3>Détails de la sortie</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Nom de la sortie</dt>
+                        <dd class="col-sm-8">{{ trip.name }}</dd>
+
+                        <dt class="col-sm-4">Date de la sortie</dt>
+                        <dd class="col-sm-8">{{ trip.dateHourStart|date('d/m/Y H:i') }}</dd>
+
+                        <dt class="col-sm-4">Site organisateur</dt>
+                        <dd class="col-sm-8">{{ trip.base.name }}</dd>
+
+                        <dt class="col-sm-4">Lieu de la sortie</dt>
+                        <dd class="col-sm-8">
+                            {{ trip.location.streetNumber }} {{ trip.location.streetName }},
+                            {{ trip.location.city.name }} {{ trip.location.city.zipCode }}
+                        </dd>
+                    </dl>
+                    
+                    {# Form for cancellation reason #}
+                    <form method="post" action="{{ path('app_trip_cancel', {id: trip.id}) }}">
+                        <div class="form-group">
+                            <label for="cancellation_reason" class="form-label mt-4">Motif de l'annulation</label>
+                            <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" rows="4" placeholder="Veuillez préciser la raison de l'annulation" required></textarea>
+                        </div>
+
+                        {# Submit and cancel buttons #}
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_trip_show', {id: trip.id}) }}" class="btn btn-secondary">Retour</a>
+                            <button type="submit" class="btn btn-danger">Confirmer l'annulation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+{% endblock %}
