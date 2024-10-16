@@ -2,28 +2,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const citySelect = document.getElementById("city");
     const locationSelect = document.getElementById("trip_location");
 
-    // Fetch initial city data when the page loads
-    if (citySelect.value) {
-        const cityId = citySelect.value;
-        fetch(`/get-city/${cityId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Populate zipCode field
-                document.querySelector("p.postalCode").innerHTML = `Code postal: ${data.zipCode}`;
-                // document.getElementById("city").innerHTML = `${data.zipCode}`;
-            })
-            .catch(error => console.error("Error fetching city data on load:", error));
-    }
-
     // Fetch initial location data when the page loads
     if (locationSelect.value) {
         const locationId = locationSelect.value;
         fetch(`/get-location/${locationId}`)
             .then(response => response.json())
             .then(data => {
+                
                 // Populate street name and coordinates
                 document.querySelector("p.streetName").innerHTML = `Rue: ${data.streetName}`;
-
+                document.querySelector("p.postalCode").innerHTML = `Code postal: ${data.zipCode}`;
                 const latitudeField = document.getElementById("latitude");
                 latitudeField.value = data.latitude || '';
                 latitudeField.placeholder = data.latitude ? '' : "Latitude not available";
@@ -31,25 +19,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 const longitudeField = document.getElementById("longitude");
                 longitudeField.value = data.longitude || '';
                 longitudeField.placeholder = data.longitude ? '' : 'Longitude not available';
+                 // Set the selected city based on data.cityId
+                 const citySelect = document.getElementById("city");
+                 if (data.cityId) {
+                     citySelect.value = data.cityId;
+                 }
+                
             })
             .catch(error => console.error("Error fetching location data on load:", error));
     }
-
-    // Fetch and populate zipCode when city changes
-    citySelect.addEventListener("change", function () {
-        const cityId = citySelect.value;
-
-        if (cityId) {
-            // Make AJAX request to get city data
-            fetch(`/get-city/${cityId}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Populate zipCode field
-                    document.querySelector("p.postalCode").innerHTML = `Code postal: ${data.zipCode}`;
-                })
-                .catch(error => console.error("Error fetching city data:", error));
-        }
-    });
 
     // Fetch and populate location details when location changes
     locationSelect.addEventListener("change", function () {
@@ -60,9 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch(`/get-location/${locationId}`)
                 .then(response => response.json())
                 .then(data => {
-
+                    console.log(data);
                     document.querySelector("p.streetName").innerHTML = `Rue: ${data.streetName}`;
-
+                    document.querySelector("p.postalCode").innerHTML = `Code postal: ${data.zipCode}`;
                     // Populate latitude, add placeholder if empty
                     const latitudeField = document.getElementById("latitude");
                     latitudeField.value = data.latitude || '';
@@ -72,6 +50,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     const longitudeField = document.getElementById("longitude");
                     longitudeField.value = data.longitude || '';
                     longitudeField.placeholder = data.longitude ? '' : 'Longitude not available';
+
+                    // Set the selected city based on data.cityId
+                    const citySelect = document.getElementById("city");
+                    if (data.cityId) {
+                        citySelect.value = data.cityId;
+                    }
                 })
                 .catch(error => console.error("Error fetching location data:", error));
         }

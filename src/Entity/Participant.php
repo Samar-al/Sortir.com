@@ -64,6 +64,9 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Trip::class, mappedBy: 'organiser')]
     private Collection $organisedTrips;
 
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $username = null;
+
     public function __construct()
     {
         $this->isAdmin  = false;
@@ -280,6 +283,18 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
                 $organisedTrip->setOrganiser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): static
+    {
+        $this->username = $username;
 
         return $this;
     }

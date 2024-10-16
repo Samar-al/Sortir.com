@@ -32,7 +32,7 @@ final class TripController extends AbstractController
         ]);
     }
 
-//    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/ajouter', name: 'app_trip_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
