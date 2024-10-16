@@ -2,11 +2,45 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
+    width: 80%;
+    border: 1px solid;
+    margin: 0 auto;
     
+}
+
+
+.table-responsive {
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table thead {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px;
+}
+
+.btn-outline-primary, .btn-outline-warning, .btn-outline-success, .btn-outline-danger {
+    margin: 0 5px;
+    padding: 5px 10px;
 }
 
 @media screen and (max-width: 900px) {
     .container-fluid.search-form{
         flex-direction: column; 
+    }
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
     }
 }
