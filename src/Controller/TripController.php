@@ -38,24 +38,40 @@ final class TripController extends AbstractController
     {
 
         $trip = new Trip();
-        // Set the default state where label is 'created'
         $formTrip = $this->createForm(TripType::class, $trip);
         $formTrip->handleRequest($request);
-
+    
         $cities = $cityRepository->findAll();
-
+    
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
-
+            $now = new \DateTime();
+    
+            // Check if dateHourStart is in the future
+            if ($trip->getDateHourStart() <= $now) {
+                $this->addFlash('warning', 'La date de la sortie doit être dans le futur.');
+                return $this->redirectToRoute('app_trip_new');
+            }
+    
+            // Check if dateRegistrationLimit is in the future
+            if ($trip->getDateRegistrationLimit() <= $now) {
+                $this->addFlash('warning', 'La date limite d\'inscription doit être dans le futur.');
+                return $this->redirectToRoute('app_trip_new');
+            }
+    
+            // Check if dateHourStart is after dateRegistrationLimit
+            if ($trip->getDateHourStart() <= $trip->getDateRegistrationLimit()) {
+                $this->addFlash('warning', 'La date de la sortie doit être après la date limite d\'inscription.');
+                return $this->redirectToRoute('app_trip_new');
+            }
+    
+            // Process city
             $cityId = $request->request->get('city');
-            
             $city = $cityRepository->find($cityId);
-
             if ($city) {
-                // Set the city on the location of the trip
                 $trip->getLocation()->setCity($city);
             }
-
-            // Check which button was clicked
+    
+            // Check which button was clicked (Publish or Save)
             $action = $request->request->get('action');
             if ($action === 'publish') {
                 // Set state to 'open' if "Publier" was clicked
@@ -70,9 +86,11 @@ final class TripController extends AbstractController
                     $trip->setState($defaultState);
                 }
             }
+    
             $trip->setOrganiser($this->getUser());
             $entityManager->persist($trip);
             $entityManager->flush();
+    
             $this->addFlash('success', 'Vous avez ajouté une sortie avec succès !');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -93,9 +111,10 @@ final class TripController extends AbstractController
     }
 
     #[Route('/modifier/{id}', name: 'app_trip_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository): Response
+    public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
-        if($this->getUser()!==$trip->getOrganiser() ){
+        // Check if the user is the organizer of the trip
+        if ($this->getUser() !== $trip->getOrganiser()) {
             $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie, vous n\'en êtes pas l\'auteur!');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -106,26 +125,63 @@ final class TripController extends AbstractController
         $cities = $cityRepository->findAll();
 
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
+            $now = new \DateTime();
+
+            // Check if dateHourStart is in the future
+            if ($trip->getDateHourStart() <= $now) {
+                $this->addFlash('warning', 'La date de la sortie doit être dans le futur.');
+                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
+            }
+
+            // Check if dateRegistrationLimit is in the future
+            if ($trip->getDateRegistrationLimit() <= $now) {
+                $this->addFlash('warning', 'La date limite d\'inscription doit être dans le futur.');
+                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
+            }
+
+            // Check if dateHourStart is after dateRegistrationLimit
+            if ($trip->getDateHourStart() <= $trip->getDateRegistrationLimit()) {
+                $this->addFlash('warning', 'La date de la sortie doit être après la date limite d\'inscription.');
+                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
+            }
+
+            // Handle city selection
             $cityId = $request->request->get('city');
             $city = $cityRepository->find($cityId);
-
             if ($city) {
-                // Set the city on the location of the trip
                 $trip->getLocation()->setCity($city);
             }
-            $trip->setOrganiser($this->getUser());
 
+            // Check which button was clicked (Save or Publish)
+            $action = $request->request->get('action');
+            if ($action === 'publish') {
+                // Set state to 'open' if "Publier" was clicked
+                $openState = $stateRepository->findOneBy(['label' => 'open']);
+                if ($openState) {
+                    $trip->setState($openState);
+                }
+            } else {
+                // Set state to 'created' if "Enregistrer" was clicked
+                $defaultState = $stateRepository->findOneBy(['label' => 'created']);
+                if ($defaultState) {
+                    $trip->setState($defaultState);
+                }
+            }
+
+            // Update the trip details
+            $trip->setOrganiser($this->getUser());
             $entityManager->flush();
-            $this->addFlash('success', 'Vous avez modifié une sortie avec succès !');
+            
+            $this->addFlash('success', 'Vous avez modifié la sortie avec succès !');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('trip/edit.html.twig', [
-            'trip' => $trip,
-            'cities' => $cities,
-            'formTrip' => $formTrip,
-        ]);
-    }
+    return $this->render('trip/edit.html.twig', [
+        'trip' => $trip,
+        'cities' => $cities,
+        'formTrip' => $formTrip->createView(),
+    ]);
+}
 
     #[Route('/supprimer/{id}', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
@@ -224,21 +280,35 @@ final class TripController extends AbstractController
     public function publishTrip(Trip $trip, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
-        if($trip->getOrganiser() !== $user) {
+    
+        // Check if the user is the organizer
+        if ($trip->getOrganiser() !== $user) {
             $this->addFlash('warning', 'Vous n\'êtes pas l\'organisateur de cette sortie');
             return $this->redirectToRoute('app_main_index');
         }
 
+        // Check if the trip is still in the 'created' state
         if ($trip->getState()->getLabel() !== 'created') {
             $this->addFlash('warning', 'Vous ne pouvez pas publier cette sortie');
             return $this->redirectToRoute('app_main_index');
         }
-        $openState = $stateRepository->findOneBy(['label' => "open"]);
+
+        // Check if the trip's dateHourStart or dateRegistrationLimit is in the past
+        $now = new \DateTime();
+        if ($trip->getDateHourStart() <= $now || $trip->getDateRegistrationLimit() <= $now) {
+            $this->addFlash('warning', 'Vous ne pouvez pas publier une sortie dont la date est déjà passée ou pour laquelle la limite d\'inscription est dépassée.');
+            return $this->redirectToRoute('app_main_index');
+        }
+
+        // Set the trip state to 'open'
+        $openState = $stateRepository->findOneBy(['label' => 'open']);
         $trip->setState($openState);
+        
+        // Persist changes to the database
         $entityManager->flush();
 
-        $this->addFlash('success', 'Votre sortie à été publiée avec succès');
-         return $this->redirectToRoute('app_main_index');
+        $this->addFlash('success', 'Votre sortie a été publiée avec succès');
+        return $this->redirectToRoute('app_main_index');
 
     }
 
