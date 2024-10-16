@@ -79,33 +79,62 @@ final class TripController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_trip_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
+    #[Route('/modifier/{id}', name: 'app_trip_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository): Response
     {
-        $form = $this->createForm(TripType::class, $trip);
-        $form->handleRequest($request);
+        if($this->getUser()!==$trip->getOrganiser() ){
+            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie, vous n\'en êtes pas l\'auteur!');
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $formTrip = $this->createForm(TripType::class, $trip);
+        $formTrip->handleRequest($request);
+
+        $cities = $cityRepository->findAll();
+
+        if ($formTrip->isSubmitted() && $formTrip->isValid()) {
+            $cityId = $request->request->get('city');
+            $city = $cityRepository->find($cityId);
+
+            if ($city) {
+                // Set the city on the location of the trip
+                $trip->getLocation()->setCity($city);
+            }
+            $trip->setOrganiser($this->getUser());
+
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'Vous avez modifié une sortie avec succès !');
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('trip/edit.html.twig', [
             'trip' => $trip,
-            'form' => $form,
+            'cities' => $cities,
+            'formTrip' => $formTrip,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_trip_delete', methods: ['POST'])]
+    #[Route('/supprimer/{id}', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($trip);
-            $entityManager->flush();
+
+        if($this->getUser()!=$trip->getOrganiser() && !$this->isGranted("ROLE_MODERATOR") ){
+            return $this->json(sprintf('{"msg":"You can not delete this trip, not yours!","code":false}'),Response::HTTP_FORBIDDEN);
         }
 
-        return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
+        if (!$this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
+            return  $this->json(sprintf('{"msg":"CSRF token not valid!","code":false}'),Response::HTTP_FORBIDDEN);
+        }
+        $entityManager->remove($trip);
+        $entityManager->flush();
+        return $this->json(sprintf('{"msg":"Trip deleted","code":true}'),Response::HTTP_ACCEPTED);
+
+//        if ($this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
+//            $entityManager->remove($trip);
+//            $entityManager->flush();
+//        }
+//
+//        return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
     }
 
    
