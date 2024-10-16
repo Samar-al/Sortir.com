@@ -18,7 +18,7 @@
                 <a href=" {{ path('app_trip_show', {id: trip.id}) }} " class="btn btn-outline-primary btn-sm">Afficher</a>
             {% endif %}
             {% if trip.state.label == 'created' and trip.organiser == app.user %}
-                <a href="{# {{ path('app_trip_edit', {id: trip.id}) }} #}" class="btn btn-outline-warning btn-sm m-1">Modifier</a>
+                <a href=" {{ path('app_trip_edit', {id: trip.id}) }} " class="btn btn-outline-warning btn-sm m-1">Modifier</a>
                 <a href="{{ path('app_trip_publish', {id: trip.id}) }}" class="btn btn-outline-success btn-sm m-1">Publier</a>
             {% endif %}
             
