@@ -32,7 +32,7 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-    #[Route('/create', name: 'app_profile_new', methods: ['GET', 'POST'])]
+    #[Route('/ajouter', name: 'app_profile_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $profile = new Participant();
@@ -121,7 +121,8 @@ final class ProfileController extends AbstractController
     #[Route('/modifier/{id}', name: 'app_profile_edit', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function edit(Request $request, Participant $profile, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    {     
+        /** @var Participant $user */
         $user = $this->getUser();
         // Check if the user is either the owner of the profile or has ROLE_ADMIN
         if ($user !== $profile && !$this->isGranted('ROLE_ADMIN')) {
@@ -163,7 +164,7 @@ final class ProfileController extends AbstractController
                 return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
             }
 
-            if (!$passwordHasher->isPasswordValid($this->getUser(), $currentPassword))
+            if (!$passwordHasher->isPasswordValid($user, $currentPassword))
             {
                 $this->addFlash("danger", "Mot de passe incorrect.");
                 return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
@@ -186,7 +187,7 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_profile_delete', methods: ['POST'])]
+    #[Route('/supprimer/{id}', name: 'app_profile_delete', methods: ['POST'])]
     public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager): Response
     {
 
