@@ -36,6 +36,10 @@ final class ProfileController extends AbstractController
         $profile = new Participant();
         $formProfile = $this->createForm(ParticipantType::class, $profile);
         $formProfile->handleRequest($request);
+
+        // Variable to hold the filename
+        $newFilename = null;
+
         if ($this->isGranted("ROLE_ADMIN")) {
             if ($formProfile->isSubmitted() && $formProfile->isValid()) {
 
@@ -44,13 +48,34 @@ final class ProfileController extends AbstractController
                 $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
                 $profile->setPassword($hashedPassword);
 
+                // Persist the profile first to get the ID
                 $entityManager->persist($profile);
-                $entityManager->flush();
+                $entityManager->flush(); // This will generate the ID for the participant
 
+                $photoFile = $formProfile->get('photo')->getData();
+                if ($photoFile) {
+                    // Guess the extension dynamically
+                    $extension = $photoFile->guessExtension(); // e.g., 'jpg', 'png'
+                
+                    // Generate a new filename using 'profilepic' + participant ID + the guessed extension
+                    $newFilename = 'profilepic' . $profile->getId() . '.' . $extension;
+                
+                    // Move the file to the directory where profile images are stored
+                    $photoFile->move(
+                        $this->getParameter('profile_pictures_directory'),
+                        $newFilename
+                    );
+                
+                    // Store the filename in the session or pass it to the template
+                }
+                 
+                // Success flash message for file upload
+                $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
                 return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
             }
         }
        else {
+            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à créer des participants');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -58,14 +83,29 @@ final class ProfileController extends AbstractController
         return $this->render('profile/new.html.twig', [
             'profile' => $profile,
             'formProfile' => $formProfile,
+            'profilePicture' => $newFilename,
         ]);
     }
 
     #[Route('/{id}', name: 'app_profile_show', methods: ['GET'])]
     public function show(Participant $profile): Response
     {
+        $profilePicturesDir = $this->getParameter('profile_pictures_directory');
+        $profilePicPath = $profilePicturesDir . '/profilepic' . $profile->getId();
+
+        // Use glob to find the file with any extension (e.g., .jpg, .png, .jpeg)
+        $profilePicFiles = glob($profilePicPath . '.*'); // Looks for any extension
+
+        // Set the profile picture variable based on the found file
+        if (!empty($profilePicFiles)) {
+            $profilePicture = basename($profilePicFiles[0]); // Retrieves the full filename with extension
+        } else {
+            $profilePicture = null; // No picture found, use default
+        }
+
         return $this->render('profile/show.html.twig', [
             'profile' => $profile,
+            'profilePicture' => $profilePicture, // Pass the profile picture to the template
         ]);
     }
 
@@ -83,19 +123,38 @@ final class ProfileController extends AbstractController
         $formProfileEdit = $this->createForm(ParticipantType::class, $profile, ['is_edit' => true]);
         $formProfileEdit->handleRequest($request);
 
+        // Variable to hold the filename
+        $newFilename = null;
+
         if ($formProfileEdit->isSubmitted() && $formProfileEdit->isValid()) {
+            // Handle the photo upload
+            $photoFile = $formProfileEdit->get('photo')->getData();
+            if ($photoFile) {
+                // Guess the extension dynamically
+                $extension = $photoFile->guessExtension();
 
-                    $idProfile = $profile->getId();
+                // Generate a new filename using 'profilepic' + participant ID + the guessed extension
+                $newFilename = 'profilepic' . $profile->getId() . '.' . $extension;
 
-                    $entityManager->flush();
-                    $this->addFlash("success","Profil mis à jour!");
-                    return $this->redirectToRoute('app_profile_show', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+                // Move the file to the directory where profile images are stored
+                $photoFile->move(
+                    $this->getParameter('profile_pictures_directory'),
+                    $newFilename
+                );
+            }
+
+            $idProfile = $profile->getId();
+
+            $entityManager->flush();
+            $this->addFlash("success","Profil mis à jour!");
+            return $this->redirectToRoute('app_profile_show', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
 
         }
 
         return $this->render('profile/edit.html.twig', [
             'participant' => $profile,
             'formProfile' => $formProfileEdit,
+            'profilePicture' => $newFilename,
         ]);
     }
 

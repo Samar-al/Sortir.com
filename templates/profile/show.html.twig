@@ -13,6 +13,7 @@
 {#            <i class="fa-regular fa-user"></i> {{ app.user.username }}#}
 {#        {% endif %}#}
 {#    </div>#}
+{% include "fragments/_flash_message.html.twig" %}
     <div class="row mt-2 text-center">
         <h1>{{profile.username}}</h1>
     </div>
@@ -24,9 +25,13 @@
                     <div class="row g-0">
                         <div class="col-md-4 gradient-custom text-center text-white"
                              style="border-top-left-radius: .5rem; border-bottom-left-radius: .5rem;">
-
-                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                            {% if profilePicture %}
+                                <img src="{{ asset('uploads/profile_pictures/' ~ profilePicture) }}" alt="Profile picture" class="img-fluid" class="img-fluid my-5" style="width: 80px;">
+                            {% else %}
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
                                  alt="Avatar" class="img-fluid my-5" style="width: 80px;" />
+                            {% endif %}
+                            
 
                             <h5>{{ profile.firstname }} {{ profile.lastname }}</h5>
                             <i class="far fa-edit mb-5"></i>
