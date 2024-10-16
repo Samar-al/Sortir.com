@@ -19,11 +19,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 const longitudeField = document.getElementById("longitude");
                 longitudeField.value = data.longitude || '';
                 longitudeField.placeholder = data.longitude ? '' : 'Longitude not available';
-                 // Set the selected city based on data.cityId
-                 const citySelect = document.getElementById("city");
-                 if (data.cityId) {
-                     citySelect.value = data.cityId;
-                 }
+                 // Update the city name and hidden input with the city ID
+                 const cityNameField = document.getElementById("city_name");
+                 const cityHiddenField = document.getElementById("city_hidden");
+ 
+                 cityNameField.value = data.cityName || '';  // Update city name
+                 cityHiddenField.value = data.cityId || '';  // Update city ID
                 
             })
             .catch(error => console.error("Error fetching location data on load:", error));
@@ -39,6 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+
+                     // Populate city name and city ID
+                     const cityNameField = document.getElementById("city_name");
+                     const cityHiddenField = document.getElementById("city_hidden");
+ 
+                     cityNameField.value = data.cityName || '';  // Update city name
+                     cityHiddenField.value = data.cityId || '';  // Update hidden field with city ID
+
                     document.querySelector("p.streetName").innerHTML = `Rue: ${data.streetName}`;
                     document.querySelector("p.postalCode").innerHTML = `Code postal: ${data.zipCode}`;
                     // Populate latitude, add placeholder if empty
@@ -51,11 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     longitudeField.value = data.longitude || '';
                     longitudeField.placeholder = data.longitude ? '' : 'Longitude not available';
 
-                    // Set the selected city based on data.cityId
-                    const citySelect = document.getElementById("city");
-                    if (data.cityId) {
-                        citySelect.value = data.cityId;
-                    }
+                
                 })
                 .catch(error => console.error("Error fetching location data:", error));
         }

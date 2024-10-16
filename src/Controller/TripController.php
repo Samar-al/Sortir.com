@@ -47,6 +47,7 @@ final class TripController extends AbstractController
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
 
             $cityId = $request->request->get('city');
+            
             $city = $cityRepository->find($cityId);
 
             if ($city) {
@@ -155,7 +156,7 @@ final class TripController extends AbstractController
 
    
 
-    #[Route('/trip/{id}/inscription', name: 'app_trip_register', methods: ['POST'])]
+    #[Route('/{id}/inscription', name: 'app_trip_register', methods: ['POST'])]
     public function registerToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -193,7 +194,7 @@ final class TripController extends AbstractController
         return $this->redirectToRoute('app_main_index');
     }
 
-    #[Route('/trip/{id}/desisstement', name: 'app_trip_unregister', methods: ['POST'])]
+    #[Route('/{id}/desisstement', name: 'app_trip_unregister', methods: ['POST'])]
     public function unregisterToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -219,7 +220,7 @@ final class TripController extends AbstractController
 
     }
 
-    #[Route('/trip/{id}/publier', name: 'app_trip_publish', methods: ['GET'])]
+    #[Route('/{id}/publier', name: 'app_trip_publish', methods: ['GET'])]
     public function publishTrip(Trip $trip, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -239,6 +240,57 @@ final class TripController extends AbstractController
         $this->addFlash('success', 'Votre sortie à été publiée avec succès');
          return $this->redirectToRoute('app_main_index');
 
+    }
+
+    #[Route('/{id}/annuler', name: 'app_trip_cancel', methods: ['GET', 'POST'])]
+    public function cancelTrip(Trip $trip, Request $request, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
+    {
+        // Get the current user
+        $user = $this->getUser();
+
+        // Check if the user is the organizer or an admin
+        if ($trip->getOrganiser() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à annuler cette sortie.');
+            return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
+        }
+
+        // Handle the POST request (form submission)
+        if ($request->isMethod('POST')) {
+            // Get the cancellation reason from the form
+            $cancellationReason = $request->request->get('cancellation_reason');
+
+            // Check if the reason is provided
+            if (empty($cancellationReason)) {
+                $this->addFlash('warning', 'Veuillez fournir une raison pour l\'annulation.');
+                return $this->redirectToRoute('app_trip_cancel', ['id' => $trip->getId()]);
+            }
+
+            // Find the "cancelled" state from the State repository
+            $cancelledState = $stateRepository->findOneBy(['label' => 'cancelled']);
+
+            // Check if the cancelled state exists
+            if (!$cancelledState) {
+                $this->addFlash('danger', 'L\'état annulé est introuvable.');
+                return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
+            }
+
+            // Update the trip's state and cancellation reason
+            $trip->setState($cancelledState);
+            $trip->setReasonCancel($cancellationReason);
+
+            // Persist the changes to the database
+            $entityManager->persist($trip);
+            $entityManager->flush();
+
+            // Add a success flash message
+            $this->addFlash('success', 'La sortie a été annulée avec succès.');
+
+            // Redirect to the trip listing or trip details
+            return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
+        }
+        return $this->render('trip/cancel.html.twig', [
+            'trip' => $trip,
+        ]);
     }
     
 
