@@ -50,3 +50,10 @@
 .button-link:hover {
     text-decoration: none;
 }
+
+.add-trip {
+    text-align: start;
+    margin-left: 19rem;
+    margin-bottom: 3rem;
+    
+}

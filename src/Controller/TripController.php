@@ -39,10 +39,6 @@ final class TripController extends AbstractController
 
         $trip = new Trip();
         // Set the default state where label is 'created'
-        $defaultState = $stateRepository->findOneBy(['label' => 'created']);
-        if ($defaultState) {
-            $trip->setState($defaultState);
-        }
         $formTrip = $this->createForm(TripType::class, $trip);
         $formTrip->handleRequest($request);
 
@@ -57,11 +53,27 @@ final class TripController extends AbstractController
                 // Set the city on the location of the trip
                 $trip->getLocation()->setCity($city);
             }
+
+            // Check which button was clicked
+            $action = $request->request->get('action');
+            if ($action === 'publish') {
+                // Set state to 'open' if "Publier" was clicked
+                $openState = $stateRepository->findOneBy(['label' => 'open']);
+                if ($openState) {
+                    $trip->setState($openState);
+                }
+            } else {
+                // Set state to 'created' if "Enregistrer" was clicked
+                $defaultState = $stateRepository->findOneBy(['label' => 'created']);
+                if ($defaultState) {
+                    $trip->setState($defaultState);
+                }
+            }
             $trip->setOrganiser($this->getUser());
             $entityManager->persist($trip);
             $entityManager->flush();
             $this->addFlash('success', 'Vous avez ajouté une sortie avec succès !');
-            return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('trip/new.html.twig', [

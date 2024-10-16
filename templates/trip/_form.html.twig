@@ -38,10 +38,13 @@
     {# Submit Button Section #}
     <div class="row mt-4">
         <div class="col">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>    
+            <button type="submit" class="btn btn-primary" name="action" value="save">Enregistrer</button>    
+        </div>
+         <div class="col">
+            <button type="submit" class="btn btn-primary" name="action" value="publish">Publier</button>    
         </div>
         <div class="col">
-            <button type="reset" class="btn btn-secondary">Réinitialiser</button> <!-- Optional reset button -->
+            <a href="{{ path('app_main_index') }}" class="btn btn-secondary">Annuler</a> <!-- Optional reset button -->
         </div>
     </div>
 </div>
