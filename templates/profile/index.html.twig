@@ -5,8 +5,17 @@
 {% block body %}
  {% include "fragments/_nav.html.twig" %}
   {% include "fragments/_flash_message.html.twig" %}
-    <h1 class="text-center">Gérer les participants</h1>
- <div class="row text-center justify-content-center">
+
+
+    <div class="text-center m-1">
+        <div class="d-flex justify-content-center align-items-end mb-3">
+            <a class="btn btn-primary ms-2" href="{{ path('app_profile_new') }}">Créer participant</a>
+            {% include "profile/_upload_form.html.twig" %}
+        </div>
+    </div>
+
+ <div class="row m-1 text-center justify-content-center">
+    <h1>Gérer les participants</h1>
     <div class="col-8">
             <table class="table table-hover">
                 <thead>
@@ -49,5 +58,4 @@
     </div>
  </div>
 
-    <a class="btn btn-primary" href="{{ path('app_profile_new') }}">Créer participant</a>
 {% endblock %}

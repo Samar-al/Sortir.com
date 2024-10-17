@@ -1,0 +1,15 @@
+<div class="container-fluid">
+        <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                        <form method="post" action="{{ path('app_profile_upload') }}" enctype="multipart/form-data">
+                                <div class="d-flex align-items-end mb-3">
+                                        <div class="flex-grow-1">
+                                                <label for="formFile" class="form-label mt-4">Fichier .csv</label>
+                                                <input class="form-control" type="file" id="formFile" name="file" accept=".csv">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary ms-3">Charger</button>
+                                </div>
+                        </form>
+                </div>
+        </div>
+</div>
