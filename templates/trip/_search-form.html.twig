@@ -1,69 +1,65 @@
 <form class="my-4" method="post" action="{{ path('app_main_index') }}" data-turbo="false">
-<div class="container-fluid search-form">
-    <div class="container1">
-        <fieldset>
-            <legend>Filtrer les sorties</legend>
-            <div class="row">
-            <div>
-            <label for="selectBase" class="form-label mt-4">Site</label>
-            <select class="form-select" id="selectBase" name="selectBase">
-            <option value=""> Site</option> <!-- Unselect option -->
-            {% for base in bases %}
-                <option>{{base.name}}</option>
-            {% endfor %}
-                
-            </select>
-            </div>
-            <div>
-                <label for="searchNameTrip" class="form-label mt-4">Le nom de la sortie contient :</label>
-                <input type="text" class="form-control" id="searchNameTrip" name="searchNameTrip">
-              
-            </div>
-            </div>
-            <div class="d-flex align-items-center m-3">
-            <span>Entre </span>
-                <div class="col-md-4"> 
+    <div class="container-fluid search-form">
+        <fieldset class="p-3 border rounded">
+            <legend class="text-center">Filtrer les sorties</legend>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="selectBase" class="form-label">Site</label>
+                    <select class="form-select" id="selectBase" name="selectBase">
+                        <option value="">Site</option> <!-- Unselect option -->
+                        {% for base in bases %}
+                            <option>{{ base.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="searchNameTrip" class="form-label">Le nom de la sortie contient :</label>
+                    <input type="text" class="form-control" id="searchNameTrip" name="searchNameTrip">
+                </div>
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label">Entre</label>
                     <input type="date" id="startDate" name="startDate" class="form-control">
                 </div>
-                <span> et </span>
-                <div class="col-md-4">
-                   
+                <div class="col-md-6">
+                    <label for="endDate" class="form-label">et</label>
                     <input type="date" id="endDate" name="endDate" class="form-control">
                 </div>
             </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="me-orga" name="me-orga" {% if app.request.get('me-orga') %}checked{% endif %}>
+                        <label class="form-check-label" for="me-orga">
+                            Sortie dont je suis l'Organisateur/trice
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="me-registered" name="me-registered" {% if app.request.get('me-registered') %}checked{% endif %}>
+                        <label class="form-check-label" for="me-registered">
+                            Sorties auxquelles je suis inscrit/e
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="me-not-registered" name="me-not-registered" {% if app.request.get('me-not-registered') %}checked{% endif %}>
+                        <label class="form-check-label" for="me-not-registered">
+                            Sorties auxquelles je ne suis pas inscrit/e
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="passed-trip" name="passed-trip" {% if app.request.get('passed-trip') %}checked{% endif %}>
+                        <label class="form-check-label" for="passed-trip">
+                            Sorties passées
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary px-5">Submit</button>
+            </div>
         </fieldset>
     </div>
-    <div class="container2">
-            <fieldset>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="me-orga" name="me-orga" {% if app.request.get('me-orga') %}checked{% endif %}>
-                <label class="form-check-label" for="me-orga">
-                Sortie dont je suis l'Organisateur/trice
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="me-registered" name="me-registered" {% if app.request.get('me-registered') %}checked{% endif %}>
-                <label class="form-check-label" for="me-registered">
-                Sorties auxquelles je suis inscrit/e
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="me-not-registered" name="me-not-registered" {% if app.request.get('me-not-registered') %}checked{% endif %}>
-                <label class="form-check-label" for="me-not-registered">
-                Sorties auxquelles je ne suis pas inscrit/e
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="passed-trip" name="passed-trip" {% if app.request.get('passed-trip') %}checked{% endif %}>
-                <label class="form-check-label" for="passed-trip">
-                Sorties passées
-                </label>
-            </div>
-            
-            </fieldset>
-    </div>
-</div>
-<div class="text-center">
-    <button type="submit" class="btn btn-primary m-4">Submit</button>
-</div>
 </form>

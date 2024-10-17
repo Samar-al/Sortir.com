@@ -1,121 +1,128 @@
 {% extends 'base.html.twig' %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{asset('css/show-trip-style.css')}}">
+        {% endblock %}
 
 {% block title %}Sortie - Afficher{% endblock %}
 
 {% block body %}
  {% include "fragments/_nav.html.twig" %}
 
-
+<div class="container my-5">
     <div class="text-center my-4">
-        <h1>{{ trip.name }}</h1>
+        <h1 class="display-4 text-primary">{{ trip.name }}</h1>
     </div>
 
-    <div class="container my-4">
-        <div class="row justify-content-center">
-            <div class="card border-primary mb-4">
-                <div class="row card-body">
-
+    <!-- Trip Info Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-primary shadow-sm mb-5">
+                <div class="card-body">
+                    <div class="row">
                         <div class="col-md-6">
-                            <table class="table">
+                            <h5 class="text-primary">Détails de la sortie</h5>
+                            <table class="table table-striped">
                                 <tbody>
                                     <tr>
-                                        <td class="text-primary-emphasis">Date et heure de la sortie : </td>
-                                        <td class="text-primary-emphasis">{{ trip.dateHourStart ? trip.dateHourStart|date('d/m/Y H:i') : '' }}</td>
+                                        <td class="fw-bold">Date et heure :</td>
+                                        <td>{{ trip.dateHourStart ? trip.dateHourStart|date('d/m/Y H:i') : '' }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Durée :</td>
-                                        <td class="text-primary-emphasis">{{ trip.duration }} en heures</td>
+                                        <td class="fw-bold">Durée :</td>
+                                        <td>{{ trip.duration }} heures</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Date limite d'inscription: </td>
-                                        <td class="text-primary-emphasis">{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('d/m/Y H:i') : '' }}</td>
+                                        <td class="fw-bold">Date limite :</td>
+                                        <td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('d/m/Y H:i') : '' }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Nombre de places : </td>
-                                        <td class="text-primary-emphasis">{{ trip.numMaxRegistration }}</td>
+                                        <td class="fw-bold">Nombre de places :</td>
+                                        <td>{{ trip.numMaxRegistration }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Détails de la sortie : </td>
-                                        <td class="text-primary-emphasis">{{ trip.tripDetails }}</td>
+                                        <td class="fw-bold">Détails :</td>
+                                        <td>{{ trip.tripDetails }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <div class="col-md-6">
-                            <table class="table">
+                            <h5 class="text-primary">Lieu de la sortie</h5>
+                            <table class="table table-striped">
                                 <tbody>
                                     <tr>
-                                        <td class="text-primary-emphasis">Ville organisatrice: </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.city.name }}</td>
+                                        <td class="fw-bold">Ville :</td>
+                                        <td>{{ trip.location.city.name }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Lieu : </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.name }}</td>
+                                        <td class="fw-bold">Lieu :</td>
+                                        <td>{{ trip.location.name }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Rue : </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.streetNumber  }} {{ trip.location.streetName }}</td>
+                                        <td class="fw-bold">Adresse :</td>
+                                        <td>{{ trip.location.streetNumber }} {{ trip.location.streetName }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Code postal : </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.city.zipcode }}</td>
+                                        <td class="fw-bold">Code postal :</td>
+                                        <td>{{ trip.location.city.zipcode }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Latitude : </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.latitude }}</td>
+                                        <td class="fw-bold">Latitude :</td>
+                                        <td>{{ trip.location.latitude }}</td>
                                     </tr>
-
                                     <tr>
-                                        <td class="text-primary-emphasis">Longitude : </td>
-                                        <td class="text-primary-emphasis">{{ trip.location.longitude }}</td>
+                                        <td class="fw-bold">Longitude :</td>
+                                        <td>{{ trip.location.longitude }}</td>
                                     </tr>
                                 </tbody>
                             </table>
-
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container my-4">
-            <div class="mb-4">
-                <div>
-                    <h2>Liste des participants</h2>
+    <!-- Participants List -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-primary mb-5">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">Liste des participants</h5>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered table-striped " style="max-width: 25%; max-height: 25%;">
+                <div class="card-body table-responsive">
+                    <table class="table table-hover table-bordered text-center">
                         <thead class="table-dark">
-                            <th>Nom d'utilisateur</th>
-                            <th>Prénom Nom</th>
+                            <tr>
+                                <th>Nom d'utilisateur</th>
+                                <th>Prénom Nom</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <tr class="table-secondary">
+                            {% if trip.participants|length > 0 %}
                                 {% for participant in trip.participants %}
+                                <tr class="table-secondary">
                                     <td>{{ participant.username }}</td>
                                     <td>{{ participant.firstname }} {{ participant.lastname }}</td>
-                                {% else %}
-                                    <td>Pas de participant</td>
-                                    <td></td>
+                                </tr>
                                 {% endfor %}
-                            </tr>
+                            {% else %}
+                                <tr class="table-warning">
+                                    <td colspan="2">Pas de participant</td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
     </div>
 
-<div class="text-center">
-    <a class="btn btn-primary" href="{{ path('app_main_index') }}">Retour</a>
+    <!-- Return Button -->
+    <div class="text-center my-4">
+        <a class="btn btn-primary px-5" href="{{ path('app_main_index') }}">Retour</a>
+    </div>
 </div>
 
 {#    <a href="{{ path('app_trip_edit', {'id': trip.id}) }}">edit</a>#}
