@@ -28,11 +28,22 @@ class LocationController extends AbstractController
             'cityName'=> $location->getCity()->getName(),
         ]);
     }
+
     #[Route('/lieu', name: 'app_location_index', methods: ['GET'])]
-    public function index(LocationRepository $locationRepository): Response
+    public function index(Request $request, LocationRepository $locationRepository): Response
     {
+      
+        $query = $request->query->get('q', '');
+
+        if ($query) {
+            // Assuming the `findByName` method in LocationRepository searches by the name field
+            $locations = $locationRepository->findByName($query);
+        } else {
+            // Retrieve all locations if no search query is present
+            $locations = $locationRepository->findAll();
+        }
         return $this->render('location/index.html.twig', [
-            'locations' => $locationRepository->findAll(),
+            'locations' => $locations,
         ]);
     }
    

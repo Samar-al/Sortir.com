@@ -24,7 +24,7 @@ final class ProfileController extends AbstractController
 
 
     #[Route(name: 'app_profile_index', methods: ['GET'])]
-    public function index(ParticipantRepository $participantRepository): Response
+    public function index(Request $request, ParticipantRepository $participantRepository): Response
     {
         if (!$this->isGranted("ROLE_ADMIN"))
         {
@@ -32,8 +32,18 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        $query = $request->query->get('q', '');
+
+        if ($query) {
+            // Assuming the `findByQuery` method in ParticipantRepository searches by lastname, firstname, and username
+            $participants = $participantRepository->findByQuery($query);
+        } else {
+            // Retrieve all participants if no search query is present
+            $participants = $participantRepository->findAll();
+        }
+
         return $this->render('profile/index.html.twig', [
-            'profiles' => $participantRepository->findAll(),
+            'profiles' => $participants
         ]);
     }
 
