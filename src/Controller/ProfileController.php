@@ -9,6 +9,7 @@ use App\Service\ProfileManagerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Exception\InvalidPasswordException;
@@ -19,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 use function PHPUnit\Framework\throwException;
 
-#[Route('/profile')]
+#[Route('/profil')]
 final class ProfileController extends AbstractController
 {
 
@@ -201,5 +202,28 @@ final class ProfileController extends AbstractController
         }
 
         return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
+    public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $participantIds = $data['participants'] ?? [];
+        $this->isCsrfTokenValid('deactivate_participants', $request->get('_token'));
+        if (!$participantIds) {
+            return new JsonResponse(['success' => false, 'message' => 'No participants selected.']);
+        }
+
+        // Fetch the participants and deactivate them
+        $participants = $entityManager->getRepository(Participant::class)->findBy(['id' => $participantIds]);
+
+        foreach ($participants as $participant) {
+            $participant->setActive(false); 
+            $entityManager->persist($participant);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
     }
 }
