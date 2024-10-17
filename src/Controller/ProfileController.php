@@ -4,11 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Form\ParticipantType;
+use App\Form\SpreadsheetType;
+use App\Repository\BaseRepository;
 use App\Repository\ParticipantRepository;
 use App\Service\ProfileManagerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Exception\InvalidPasswordException;
@@ -17,9 +21,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+use Symfony\Component\String\Slugger\SluggerInterface;
 use function PHPUnit\Framework\throwException;
 
-#[Route('/profile')]
+#[Route('/profil')]
 final class ProfileController extends AbstractController
 {
 
@@ -27,6 +32,12 @@ final class ProfileController extends AbstractController
     #[Route(name: 'app_profile_index', methods: ['GET'])]
     public function index(ParticipantRepository $participantRepository): Response
     {
+        if (!$this->isGranted("ROLE_ADMIN"))
+        {
+            $this->addFlash('danger', 'Vous n\'avez pas les droits suffisant pour aller à cette page!');
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
+
         return $this->render('profile/index.html.twig', [
             'profiles' => $participantRepository->findAll(),
         ]);
@@ -42,50 +53,51 @@ final class ProfileController extends AbstractController
         // Variable to hold the filename
         $newFilename = null;
 
-        if ($this->isGranted("ROLE_ADMIN")) {
-            if ($formProfile->isSubmitted() && $formProfile->isValid()) {
-
-                $plainPassword = $formProfile->get('plainPassword')->getData();
-                $confirmPassword = $formProfile->get('confirmPassword')->getData();
-
-                if ($plainPassword !== $confirmPassword) {
-                    $this->addFlash('danger', "Les mots de passe ne sont pas identiques.");
-                    return $this->redirectToRoute('app_profile_new', [], Response::HTTP_SEE_OTHER);
-                }
-
-                $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
-                $profile->setPassword($hashedPassword);
-
-                // Persist the profile first to get the ID
-                $entityManager->persist($profile);
-                $entityManager->flush(); // This will generate the ID for the participant
-
-                $photoFile = $formProfile->get('photo')->getData();
-                if ($photoFile) {
-                    // Guess the extension dynamically
-                    $extension = $photoFile->guessExtension(); // e.g., 'jpg', 'png'
-                
-                    // Generate a new filename using 'profilepic' + participant ID + the guessed extension
-                    $newFilename = 'profilepic' . $profile->getId() . '.' . $extension;
-                
-                    // Move the file to the directory where profile images are stored
-                    $photoFile->move(
-                        $this->getParameter('profile_pictures_directory'),
-                        $newFilename
-                    );
-                
-                    // Store the filename in the session or pass it to the template
-                }
-                 
-                // Success flash message for file upload
-                $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
-                return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
-            }
-        }
-       else {
+        if (!$this->isGranted("ROLE_ADMIN"))
+        {
             $this->addFlash('danger', 'Vous n\'êtes pas autorisé à créer des participants');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
+
+        if ($formProfile->isSubmitted() && $formProfile->isValid()) {
+
+            $plainPassword = $formProfile->get('plainPassword')->getData();
+            $confirmPassword = $formProfile->get('confirmPassword')->getData();
+
+            if ($plainPassword !== $confirmPassword) {
+                $this->addFlash('danger', "Les mots de passe ne sont pas identiques.");
+                return $this->redirectToRoute('app_profile_new', [], Response::HTTP_SEE_OTHER);
+            }
+
+            $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
+            $profile->setPassword($hashedPassword);
+
+            // Persist the profile first to get the ID
+            $entityManager->persist($profile);
+            $entityManager->flush(); // This will generate the ID for the participant
+
+            $photoFile = $formProfile->get('photo')->getData();
+            if ($photoFile) {
+                // Guess the extension dynamically
+                $extension = $photoFile->guessExtension(); // e.g., 'jpg', 'png'
+
+                // Generate a new filename using 'profilepic' + participant ID + the guessed extension
+                $newFilename = 'profilepic' . $profile->getId() . '.' . $extension;
+
+                // Move the file to the directory where profile images are stored
+                $photoFile->move(
+                    $this->getParameter('profile_pictures_directory'),
+                    $newFilename
+                );
+
+                // Store the filename in the session or pass it to the template
+            }
+
+            // Success flash message for file upload
+            $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
+
 
 
         return $this->render('profile/new.html.twig', [
@@ -201,5 +213,103 @@ final class ProfileController extends AbstractController
         }
 
         return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/charger', name: 'app_profile_upload', methods: ['POST'])]
+    public function uploadParticipants(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, BaseRepository $baseRepository): Response
+    {
+
+        $file = $request->files->get('file');
+
+        if ($file) {
+
+            if ($file->getClientOriginalExtension() !== 'csv') {
+                $this->addFlash("danger", "Le fichier doit être au format .csv.");
+                return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+            }
+
+            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+            try {
+                $file->move(
+                    $this->getParameter('csv_directory'),
+                    $newFilename
+                );
+            } catch (FileException $e) {
+                throw new FileException("Erreur lors du téléchargement du fichier.");
+            }
+
+            $filePath = $this->getParameter('csv_directory') . '/' . $newFilename;
+
+            if (($handle = fopen($filePath, 'r')) !== false) {
+                while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+
+                    $username = $data[0];
+                    $firstname = $data[1];
+                    $lastname = $data[2];
+                    $phoneNumber = $data[3];
+                    $mail = $data[4];
+                    $password = $data[5];
+
+                    $base = $baseRepository->findOneBy(['name' => $data[6]]);
+
+                    // Vérifier si l'utilisateur existe déjà dans la base de données
+                    $existingParticipant = $entityManager->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
+
+                    if (!$existingParticipant) {
+                        // Créer un nouvel utilisateur
+                        $participant = new Participant();
+                        $participant->setUsername($username);
+                        $participant->setMail($mail);
+                        $participant->setFirstname($firstname);
+                        $participant->setLastname($lastname);
+                        $participant->setPassword(password_hash($password, PASSWORD_BCRYPT)); // Hash du mot de passe
+                        $participant->setPhoneNumber($phoneNumber);
+                        $participant->setBase($base);
+                        $participant->setActive(true);
+
+                        $participant->setRoles(["ROLE_USER"]);
+
+                        // Persister les données dans la base de données
+                        $entityManager->persist($participant);
+                    }
+                }
+                fclose($handle);
+                $entityManager->flush();
+
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+
+                return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+            }
+        }
+        return $this->render('profile/upload.html.twig', [
+        ]);
+
+    #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
+    public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $participantIds = $data['participants'] ?? [];
+        $this->isCsrfTokenValid('deactivate_participants', $request->get('_token'));
+        if (!$participantIds) {
+            return new JsonResponse(['success' => false, 'message' => 'No participants selected.']);
+        }
+
+        // Fetch the participants and deactivate them
+        $participants = $entityManager->getRepository(Participant::class)->findBy(['id' => $participantIds]);
+
+        foreach ($participants as $participant) {
+            $participant->setActive(false); 
+            $entityManager->persist($participant);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+
     }
 }

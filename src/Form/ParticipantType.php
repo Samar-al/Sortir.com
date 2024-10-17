@@ -59,7 +59,8 @@ class ParticipantType extends AbstractType
                     "mapped" => false,
                     "label" => "Confirmez mot de passe",
                     "required" => false,
-                ]);
+                ])
+            ;
         }
 
         $builder
@@ -84,7 +85,8 @@ class ParticipantType extends AbstractType
                 'attr'=>[
                     'accept'=>'image/*'
                 ]
-            ]);
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
