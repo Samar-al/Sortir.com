@@ -43,6 +43,12 @@
                                         <td class="fw-bold">Détails :</td>
                                         <td>{{ trip.tripDetails }}</td>
                                     </tr>
+                                    {% if trip.reasonCancel is not empty %}
+                                    <tr>
+                                        <td class="fw-bold">Motif d'annulation :</td>
+                                        <td>{{ trip.reasonCancel }}</td>
+                                    </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>

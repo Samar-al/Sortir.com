@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TripRepository::class)]
 class Trip
@@ -16,18 +17,29 @@ class Trip
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer un nom pour décrire la sortie")]
+    #[Assert\Length(
+        min:3,
+        max:255,
+        minMessage:"Il faut au minimum {{ limit }} caractères",
+        maxMessage:"Vous ne pouvez dépasser les {{ limit }} caractères"
+    )]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer une date de début de sortie")]
     #[ORM\Column]
     private ?\DateTimeImmutable $dateHourStart = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer une durée de sortie")]
     #[ORM\Column]
     private ?int $duration = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer une date de limte d'inscription")]
     #[ORM\Column]
     private ?\DateTimeImmutable $dateRegistrationLimit = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer une le nombre de place pour cette sortie")]
     #[ORM\Column]
     private ?int $numMaxRegistration = null;
 

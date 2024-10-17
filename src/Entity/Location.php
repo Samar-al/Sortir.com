@@ -6,6 +6,7 @@ use App\Repository\LocationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
 class Location
@@ -15,6 +16,7 @@ class Location
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer un nom pour decrire ce lieu")]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -27,6 +29,7 @@ class Location
     #[ORM\Column]
     private ?int $streetNumber = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer le nom de la rue")]
     #[ORM\Column(length: 255)]
     private ?string $streetName = null;
 

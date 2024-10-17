@@ -1,20 +1,54 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Hello LocationController!{% endblock %}
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{asset('css/location-style.css')}}">
+        {% endblock %}
+{% block title %}Liste de Lieux{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+ {% include "fragments/_nav.html.twig" %}
+ <div class="container my-4">
+    <div class="text-center mb-4">
+        <h1 class="display-5">Liste de Lieux</h1>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Street Number</th>
+                    <th>Street Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for location in locations %}
+                    <tr>
+                        <td>{{ location.id }}</td>
+                        <td>{{ location.name }}</td>
+                        <td>{{ location.latitude }}</td>
+                        <td>{{ location.longitude }}</td>
+                        <td>{{ location.streetNumber }}</td>
+                        <td>{{ location.streetName }}</td>
+                        <td>
+                            <a href="{{ path('app_location_show', {'id': location.id}) }}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                            <a href="{{ path('app_location_edit', {'id': location.id}) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No records found</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Applications/MAMP/htdocs/Sortir.com/src/Controller/LocationController.php</code></li>
-        <li>Your template at <code>/Applications/MAMP/htdocs/Sortir.com/templates/location/index.html.twig</code></li>
-    </ul>
+    <div class="text-center mt-4">
+        <a href="{{ path('app_location_new') }}" class="btn btn-primary">Ajouter un lieu</a>
+    </div>
 </div>
 {% endblock %}

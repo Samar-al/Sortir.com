@@ -170,21 +170,26 @@ final class ProfileController extends AbstractController
             $plainPassword = $formProfileEdit->get('plainPassword')->getData();
             $confirmPassword = $formProfileEdit->get('confirmPassword')->getData();
 
-            if ($plainPassword !== $confirmPassword)
-            {
-               $this->addFlash("danger", "Les mots de passe ne sont pas identiques.");
-                return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+            if(!empty($plainPassword)){
+
+                if ($plainPassword !== $confirmPassword)
+                {
+                   $this->addFlash("danger", "Les mots de passe ne sont pas identiques.");
+                    return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+                }
+    
+                if (!$passwordHasher->isPasswordValid($user, $currentPassword))
+                {
+                    $this->addFlash("danger", "Mot de passe incorrect.");
+                    return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+                }
+
+                $plainPassword = $formProfileEdit->get('plainPassword')->getData();
+                $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
+                $profile->setPassword($hashedPassword);
             }
 
-            if (!$passwordHasher->isPasswordValid($user, $currentPassword))
-            {
-                $this->addFlash("danger", "Mot de passe incorrect.");
-                return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
-            }
-
-            $plainPassword = $formProfileEdit->get('plainPassword')->getData();
-            $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
-            $profile->setPassword($hashedPassword);
+           
 
             $entityManager->flush();
             $this->addFlash("success","Profil mis à jour!");
@@ -288,6 +293,7 @@ final class ProfileController extends AbstractController
         }
         return $this->render('profile/upload.html.twig', [
         ]);
+    }    
 
     #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
     public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager): JsonResponse
