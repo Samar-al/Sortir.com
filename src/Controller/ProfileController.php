@@ -4,25 +4,19 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Form\ParticipantType;
-use App\Form\SpreadsheetType;
 use App\Repository\BaseRepository;
 use App\Repository\ParticipantRepository;
-use App\Service\ProfileManagerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Exception\InvalidPasswordException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-
 use Symfony\Component\String\Slugger\SluggerInterface;
-use function PHPUnit\Framework\throwException;
 
 #[Route('/profil')]
 final class ProfileController extends AbstractController
@@ -170,6 +164,7 @@ final class ProfileController extends AbstractController
             $plainPassword = $formProfileEdit->get('plainPassword')->getData();
             $confirmPassword = $formProfileEdit->get('confirmPassword')->getData();
 
+
             if(!empty($plainPassword)){
 
                 if ($plainPassword !== $confirmPassword)
@@ -191,6 +186,7 @@ final class ProfileController extends AbstractController
 
            
 
+
             $entityManager->flush();
             $this->addFlash("success","Profil mis à jour!");
             return $this->redirectToRoute('app_profile_show', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
@@ -208,16 +204,21 @@ final class ProfileController extends AbstractController
     public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager): Response
     {
 
-        if ($this->isCsrfTokenValid('delete'.$participant->getId(), $request->getPayload()->getString('_token'))) {
-            if ($this->isGranted("ROLE_ADMIN")) {
-                $entityManager->remove($participant);
-                $entityManager->flush();
-                $this->addFlash("success","Profil a bien été supprimé!");
-            }
-
+        if(!$this->isGranted("ROLE_ADMIN") ){
+            $this->addFlash("danger", "Vous n'avez pas les droits suffisants!");
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if (!$this->isCsrfTokenValid('delete'.$participant->getId(), $request->getPayload()->getString('_token'))) {
+            $this->addFlash("danger", "CSRF token n'est pas valide!");
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $entityManager->remove($participant);
+        $entityManager->flush();
+        $this->addFlash("success", "Vous avez supprimé un profil avec succès !");
         return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+
     }
 
     #[Route('/charger', name: 'app_profile_upload', methods: ['POST'])]
@@ -293,7 +294,9 @@ final class ProfileController extends AbstractController
         }
         return $this->render('profile/upload.html.twig', [
         ]);
+
     }    
+
 
     #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
     public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager): JsonResponse
