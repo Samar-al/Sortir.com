@@ -36,8 +36,10 @@
                     <button type="submit" class="btn btn-outline-danger btn-sm m-1">Se désinscrire</button>
                 </form>
             {% endif %}
-           {% if (trip.organiser == app.user or is_granted('ROLE_ADMIN')) and trip.dateHourStart > "now" | date('Y-m-d H:i') %}
-                 <a href=" {{ path('app_trip_cancel', {id: trip.id}) }} " class="btn btn-outline-danger btn-sm m-1">Annuler</a>
+           {% if (trip.organiser == app.user or is_granted('ROLE_ADMIN')) 
+                and trip.dateHourStart > "now" | date('Y-m-d H:i') 
+                and trip.state.label != 'cancelled' %}
+                <a href="{{ path('app_trip_cancel', {id: trip.id}) }}" class="btn btn-outline-danger btn-sm m-1">Annuler</a>
             {% endif %}
         </td>
     </tr>
