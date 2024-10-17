@@ -53,12 +53,12 @@ class ParticipantType extends AbstractType
                 ->add('plainPassword', PasswordType::class, [
                     "mapped" => false,
                     "label" => "Mot de passe",
-                    "required" => false,
+                    "required" => true,
                 ])
                 ->add('confirmPassword', PasswordType::class, [
                     "mapped" => false,
                     "label" => "Confirmez mot de passe",
-                    "required" => false,
+                    "required" => true,
                 ])
             ;
         }
