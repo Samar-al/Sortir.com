@@ -6,6 +6,8 @@ namespace App\Controller;
 use App\Entity\City;
 use App\Entity\Location;
 use App\Entity\Trip;
+use App\Event\TripRegistrationEvent;
+use App\Event\TripUnregistrationEvent;
 use App\Form\TripType;
 use App\Repository\CityRepository;
 
@@ -13,6 +15,7 @@ use App\Repository\StateRepository;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -213,7 +216,7 @@ final class TripController extends AbstractController
    
 
     #[Route('/{id}/inscription', name: 'app_trip_register', methods: ['POST'])]
-    public function registerToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager): Response
+    public function registerToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
     {
         $user = $this->getUser();
     
@@ -245,13 +248,14 @@ final class TripController extends AbstractController
         $trip->addParticipant($user);
         $entityManager->persist($trip);
         $entityManager->flush();
-    
+        // Dispatch the TripRegistrationEvent
+        $eventDispatcher->dispatch(new TripRegistrationEvent($trip), TripRegistrationEvent::NAME);
         $this->addFlash('success', 'Vous vous êtes inscrit à la sortie avec succès !');
         return $this->redirectToRoute('app_main_index');
     }
 
     #[Route('/{id}/desisstement', name: 'app_trip_unregister', methods: ['POST'])]
-    public function unregisterToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager): Response
+    public function unregisterToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
     {
         $user = $this->getUser();
 
@@ -270,7 +274,9 @@ final class TripController extends AbstractController
          $trip->removeParticipant($user);
          $entityManager->persist($trip);
          $entityManager->flush();
-     
+
+         // Dispatch the TripUnregistrationEvent
+         $eventDispatcher->dispatch(new TripUnregistrationEvent($trip), TripUnregistrationEvent::NAME);
          $this->addFlash('success', 'Vous êtes bien désinscrit de la sortie');
          return $this->redirectToRoute('app_main_index');
 
