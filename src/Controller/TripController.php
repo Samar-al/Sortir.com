@@ -205,12 +205,6 @@ final class TripController extends AbstractController
         $this->addFlash("success", "Vous avez supprimé une sortie avec succès !");
         return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
 
-//        if ($this->isCsrfTokenValid('delete'.$trip->getId(), $request->getPayload()->getString('_token'))) {
-//            $entityManager->remove($trip);
-//            $entityManager->flush();
-//        }
-//
-//        return $this->redirectToRoute('app_trip_index', [], Response::HTTP_SEE_OTHER);
     }
 
    
