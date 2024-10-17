@@ -20,6 +20,7 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
+                    <th scope="col">#</th>
                     <th scope="col">ID</th>
                     <th scope="col">Prénom</th>
                     <th scope="col">Nom de famille</th>
@@ -35,6 +36,7 @@
                 {% for profile in profiles %}
 
                     <tr class="table-primary">
+                        <td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
                         <td>{{ profile.id }}</td>
                         <td>{{ profile.firstname }}</td>
                         <td>{{ profile.lastname }}</td>
@@ -53,9 +55,17 @@
                     </tr>
 
                 {% endfor %}
+                
                 </tbody>
             </table>
+            <a class="btn btn-outline-danger" id="deactivate-button">Désactiver</a>
+            <input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
     </div>
  </div>
 
+
+    <a class="btn btn-primary" href="{{ path('app_profile_new') }}">Créer participant</a>
+    {% block javascripts %}
+            <script src="{{asset('js/deactivate-participant.js')}}"></script>
+        {% endblock %}
 {% endblock %}

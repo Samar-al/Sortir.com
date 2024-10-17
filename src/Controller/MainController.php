@@ -50,7 +50,7 @@ class MainController extends AbstractController
         }
     
         return $this->render('main/index.html.twig', [
-            'trips' => $tripRepository->findAll(),
+            'trips' => $tripRepository->findBy(['isArchived' => false]),
             'bases' => $baseRepository->findAll(),  // Assuming bases are available via a repository method
         ]);
     }
