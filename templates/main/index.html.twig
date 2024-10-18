@@ -6,6 +6,12 @@
 
 {% block body %}
     {% include "fragments/_nav.html.twig" %}
+    {% include "fragments/_flash_message.html.twig" %}
+    {% if app.request.query.get('message') %}
+    <div class="alert alert-warning">
+        {{ app.request.query.get('message') }}
+    </div>
+{% endif %}
      {% if is_granted ('IS_AUTHENTICATED_FULLY') %}   
        <div class="container-fluid d-flex justify-content-end">
             <div class="col-3 p-3 homesquare shadow rounded bg-white my-4">

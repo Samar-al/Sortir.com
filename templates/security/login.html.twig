@@ -5,6 +5,12 @@
 {% block title %}Log in!{% endblock %}
 
 {% block body %}
+{% include "fragments/_flash_message.html.twig" %}
+{% if app.request.query.get('message') %}
+    <div class="alert alert-warning">
+        {{ app.request.query.get('message') }}
+    </div>
+{% endif %}
 <div class="container-fluid login">
     <div class="row login">
         <div class="col-3">
