@@ -20,10 +20,16 @@ final class CityController extends AbstractController
 
     #[isGranted('ROLE_ADMIN')]
     #[Route(name: 'app_city_index', methods: ['GET'])]
-    public function index(CityRepository $cityRepository): Response
+    public function index(CityRepository $cityRepository, Request $request): Response
     {
+        $search = $request->query->get('search');
+        if ($search) {
+            $cities = $cityRepository->searchByName($search);
+        } else {
+            $cities = $cityRepository->findAll();
+        }
         return $this->render('city/index.html.twig', [
-            'cities' => $cityRepository->findAll(),
+            'cities' => $cities,
         ]);
     }
 
