@@ -12,12 +12,13 @@
     </div>
 
     <!-- Search Form -->
-    <form method="GET" action="{{ path('app_location_index') }}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Rechercher un lieu..." value="{{ app.request.get('q') }}">
+
+    <div class="mb-4">
+        <form method="GET" action="{{ path('app_location_index') }}" class="d-flex">
+            <input type="text" name="q" class="form-control me-2" placeholder="Rechercher un lieu..." value="{{ app.request.get('q') }}">
             <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
-        </div>
-    </form>
+        </form>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-hover table-bordered">

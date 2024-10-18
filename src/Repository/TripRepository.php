@@ -92,6 +92,14 @@ class TripRepository extends ServiceEntityRepository
             ->findOneBy(['label' => $label]);
     }
         
+    public function searchByName(string $search): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.name LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->getQuery()
+            ->getResult();
+    }
 
 
     //    /**

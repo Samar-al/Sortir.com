@@ -101,15 +101,14 @@ final class ProfileController extends AbstractController
                     $newFilename
                 );
 
-                // Store the filename in the session or pass it to the template
+                // Add a success flash message for the picture upload
+                $this->addFlash('success', 'Photo de profil téléchargée avec succès !');
             }
 
             // Success flash message for file upload
-            $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
+            $this->addFlash('success', 'Le profil a été créé avec succès !');
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
-
-
 
         return $this->render('profile/new.html.twig', [
             'profile' => $profile,
