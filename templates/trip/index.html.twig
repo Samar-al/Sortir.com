@@ -17,14 +17,13 @@
             </div>
             
             {# Add search form #}
-            <form method="GET" action="{{ path('app_trip_index') }}" class="mb-4">
-                <div class="input-group">
+              <div class="mb-4">
+                <form method="GET" action="{{ path('app_trip_index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control" placeholder="Rechercher par nom de sortie..." value="{{ app.request.query.get('search') }}">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="bi bi-search"></i> Rechercher
-                    </button>
-                </div>
-            </form>
+                    <button class="btn btn-outline-secondary" type="submit">Rechercher</button>     
+                </form>
+             </div>
+               
 
             <div class="table-responsive">
                 <table class="table table-hover table-bordered">

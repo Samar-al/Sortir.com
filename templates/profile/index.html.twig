@@ -22,12 +22,12 @@
     </div>
 
     <!-- Search Form -->
-    <form method="GET" action="{{ path('app_profile_index') }}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
-            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
-        </div>
-    </form>
+     <div class="mb-4">
+         <form method="GET" action="{{ path('app_profile_index') }}" class="d-flex"> 
+            <input type="text" name="q" class="form-control me-2" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
+            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>     
+        </form>
+    </div>
 
     <!-- Participant Table -->
     <div class="table-responsive">
