@@ -50,7 +50,7 @@ class UserDeactivationListener
 
             // Programmatically log out the user
             $this->security->logout(false);
-            
+           
             // Redirect to the login page with a deactivation message
             $loginUrl = $this->router->generate('app_login', [
                 'message' => 'Vous avez été déconnecté, vous êtes un utilisateur inactif. Contactez l\'admin pour plus d\'information.'

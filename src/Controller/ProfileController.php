@@ -26,6 +26,7 @@ final class ProfileController extends AbstractController
     #[Route(name: 'app_profile_index', methods: ['GET'])]
     public function index(Request $request, ParticipantRepository $participantRepository): Response
     {
+        
         if (!$this->isGranted("ROLE_ADMIN"))
         {
             $this->addFlash('danger', 'Vous n\'avez pas les droits suffisant pour aller à cette page!');
@@ -41,9 +42,10 @@ final class ProfileController extends AbstractController
             // Retrieve all participants if no search query is present
             $participants = $participantRepository->findAll();
         }
-
+    
         return $this->render('profile/index.html.twig', [
-            'profiles' => $participants
+            'profiles' => $participants,
+          
         ]);
     }
 
@@ -100,6 +102,8 @@ final class ProfileController extends AbstractController
 
             // Success flash message for file upload
             $this->addFlash('success', 'Le profil a été créé avec succès !');
+          //  $session = $request->getSession();
+          //  dd($session->getBag('flashes')); // Dumps all flash messages
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
