@@ -1,0 +1,74 @@
+<div class="container my-4 location-form-page">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                {{ form_start(form) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.location.name, 'Nom du lieu', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location.name, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.location.name) }} <!-- Show validation errors -->
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.location.latitude, 'Latitude', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location.latitude, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.location.latitude) }} <!-- Show validation errors -->
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.location.longitude, 'Longitude', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location.longitude, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.location.longitude) }} <!-- Show validation errors -->
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.location.streetNumber, 'Numéro de rue', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location.streetNumber, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.location.streetNumber) }} <!-- Show validation errors -->
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.location.streetName, 'Nom de rue', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location.streetName, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.location.streetName) }} <!-- Show validation errors -->
+                </div>
+
+                <div>
+                    <label for="city_department" class="form-label mt-4">Département</label>
+                    <select class="form-select" id="city_department" name="city_department">
+                        <option value="" disabled selected>Sélectionner un département</option>
+                        {% for department in departments %}
+                            <option value="{{ department.code }}">{{ department.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="cityName" class="form-label mt-4">Ville</label>
+                    <select class="form-select" id="cityName" name="cityName">
+                        <option value="" disabled selected>Sélectionner une ville</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.city.ZipCode, 'Code postal', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.city.ZipCode, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.city.ZipCode) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_widget(form.city.name, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.city.name) }}
+                </div>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg">{{ button_label|default('Save') }}</button>
+                </div>
+
+                {{ form_end(form) }}
+
+            </div>
+        </div>
+    </div>
+</div>

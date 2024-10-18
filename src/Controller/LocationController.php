@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\City;
 use App\Entity\Location;
+use App\Form\CityType;
 use App\Form\LocationType;
 use App\Repository\LocationRepository;
+use App\Service\CityLoaderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,22 +52,72 @@ class LocationController extends AbstractController
    
 
     #[Route('lieu/ajouter', name: 'app_location_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, CityLoaderService $cityLoaderService): Response
     {
         $location = new Location();
-        $form = $this->createForm(LocationType::class, $location);
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $form = $this->createForm(LocationType::class, $location, ['is_admin' => true]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $entityManager->persist($location);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
+            }
+
+            return $this->render('location/new.html.twig', [
+                'location' => $location,
+                'form' => $form,
+            ]);
+
+        }
+
+        $city = new City();
+
+        $departments = $cityLoaderService->loadDepartments();
+
+        $form = $this->createFormBuilder()
+            ->add('location', LocationType::class, ['data' => $location, 'is_admin' => false])
+            ->add('city', CityType::class, [
+                'data' => $city,
+            ])
+            ->getForm();
+
+//        $formLocation = $this->createForm(LocationType::class, $location, ['is_admin' => false]);
+//        $formCity =     $this->createForm(CityType::class, $city);
+
+//        $formLocation->handleRequest($request);
+//        $formCity->handleRequest($request);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $city = $form->get('city')->getData();
+
+            if ($city == null || empty($city->getZipCode())) {
+                $this->addFlash('danger', 'Vous devez sélectionner une ville !');
+                return $this->redirectToRoute('app_location_new', [], Response::HTTP_SEE_OTHER);
+            }
+
+            $entityManager->persist($city);
+            $entityManager->flush();
+
+            $location->setCity($city);
+
             $entityManager->persist($location);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash("success", "Vous avez ajouté le lieu avec succès ! ");
+            return $this->redirectToRoute('app_trip_new', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('location/new.html.twig', [
+            'departments' => $departments,
             'location' => $location,
-            'form' => $form,
+            'form' => $form->createView(),
+
         ]);
     }
 

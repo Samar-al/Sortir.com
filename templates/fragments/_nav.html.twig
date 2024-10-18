@@ -14,10 +14,10 @@
         <div class="collapse navbar-collapse " id="navbarSupportedContent">
             <ul class="navbar-nav me-auto align-items-center">
             {% if is_granted ('IS_AUTHENTICATED_FULLY') %}
-                <li class="nav-item ">
-                    <a class="nav-link {% if app.request.pathinfo is same as (path('app_city_index')) %} active {% endif %}" href="{{ path('app_city_index') }}"><i class="bi bi-person"></i>Villes</a>
-                </li>
              {% if "ROLE_ADMIN" in app.user.roles %}
+                 <li class="nav-item ">
+                     <a class="nav-link {% if app.request.pathinfo is same as (path('app_city_index')) %} active {% endif %}" href="{{ path('app_city_index') }}"><i class="bi bi-person"></i> Villes</a>
+                 </li>
                 <li class="nav-item ">
                 <a class="nav-link {% if app.request.pathinfo is same as (path('app_location_index')) %} active {% endif %}" href="{{path('app_location_index')}}"><i class="bi bi-person"></i> Sites</a>
                 </li>

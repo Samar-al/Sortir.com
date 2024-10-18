@@ -39,12 +39,14 @@
                     {{ form_widget(form.city, {'attr': {'class': 'form-select'}}) }}
                     {{ form_errors(form.city) }} <!-- Show validation errors -->
                 </div>
-                
+
                 <div class="text-center mt-4">
                     <button class="btn btn-primary btn-lg">{{ button_label|default('Save') }}</button>
                 </div>
 
                 {{ form_end(form) }}
+
+
             </div>
         </div>
     </div>
