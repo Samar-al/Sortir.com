@@ -34,3 +34,26 @@ services:
                 name: kernel.event_listener
                 event: trip.unregistration
                 method: onTripUnregistration 
+
+    App\EventListener\UserAccessListener:
+        tags:
+            -  
+                name: 'kernel.event_listener' 
+                event: 'Symfony\Component\Security\Http\Event\CheckPassportEvent' 
+                method: 'onCheckPassport'
+                priority: 10 
+
+    App\EventListener.UserDeactivationListener:
+        class: App\EventListener\UserDeactivationListener
+        arguments:
+            $participantRepository: '@App\Repository\ParticipantRepository'
+            $logoutUrlGenerator: '@security.logout_url_generator'
+            $security: '@security.helper'
+            $router: '@router'
+          
+        tags:
+            -  
+                name: kernel.event_listener 
+                event: kernel.request 
+                method: onKernelRequest 
+   
