@@ -7,7 +7,8 @@
 {% block body %}
  {% include "fragments/_nav.html.twig" %}
     <h1 class="text-center">Création du lieu</h1>
-    {% include "fragments/_flash_message.html.twig" %}  
+    {% include "fragments/_flash_message.html.twig" %} 
+     
     {{ include('location/_form.html.twig', {'button_label': 'Enregistrer'})  }}
 
     <div><a href="{{ path('app_location_index') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-return-left"></i></a></div>
