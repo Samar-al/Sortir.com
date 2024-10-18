@@ -1,0 +1,33 @@
+.table {
+    font-size: 0.9rem;
+}
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn {
+    margin-right: 0.5rem;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table th, .table td {
+        font-size: 0.75rem;
+    }
+
+    .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+

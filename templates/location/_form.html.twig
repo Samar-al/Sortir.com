@@ -1,0 +1,51 @@
+<div class="container my-4 location-form-page">
+     <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                {{ form_start(form) }}
+                
+                <div class="mb-3">
+                    {{ form_label(form.name, 'Nom du lieu', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.name) }} <!-- Show validation errors -->
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.latitude, 'Latitude', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.latitude, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.latitude) }} <!-- Show validation errors -->
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.longitude, 'Longitude', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.longitude, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.longitude) }} <!-- Show validation errors -->
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.streetNumber, 'Numéro de rue', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.streetNumber, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.streetNumber) }} <!-- Show validation errors -->
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.streetName, 'Nom de rue', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.streetName, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.streetName) }} <!-- Show validation errors -->
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.city, 'Ville', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.city, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.city) }} <!-- Show validation errors -->
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg">{{ button_label|default('Save') }}</button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>

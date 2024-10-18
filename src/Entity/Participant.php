@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ParticipantRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_MAIL', fields: ['mail'])]
@@ -31,11 +32,24 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message:"Vous devez entrer un mot de passe")]
     private ?string $password = null;
 
+    #[Assert\Length(
+        min:3,
+        max:128,
+        minMessage:"Il faut au minimum {{ limit }} caractères",
+        maxMessage:"Vous ne pouvez dépasser les {{ limit }} caractères"
+    )]
     #[ORM\Column(length: 128)]
     private ?string $firstname = null;
 
+    #[Assert\Length(
+        min:3,
+        max:128,
+        minMessage:"Il faut au minimum {{ limit }} caractères",
+        maxMessage:"Vous ne pouvez dépasser les {{ limit }} caractères"
+    )]
     #[ORM\Column(length: 128)]
     private ?string $lastname = null;
 
@@ -70,7 +84,7 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->isAdmin  = false;
-        $this->isActive  = false;
+        $this->isActive  = true;
         $this->trips = new ArrayCollection();
         $this->organisedTrips = new ArrayCollection();
     }
