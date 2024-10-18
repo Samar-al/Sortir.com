@@ -6,6 +6,7 @@ use App\Repository\StateRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StateRepository::class)]
 class State
@@ -15,6 +16,13 @@ class State
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer un nom")]
+    #[Assert\Length(
+        min:3,
+        max:50,
+        minMessage:"Il faut au minimum {{ limit }} caractères",
+        maxMessage:"Vous ne pouvez dépasser les {{ limit }} caractères"
+    )]
     #[ORM\Column(length: 50)]
     private ?string $label = null;
 

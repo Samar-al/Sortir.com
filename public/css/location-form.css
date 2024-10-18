@@ -1,0 +1,75 @@
+.location-form-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.location-form-page h1 {
+    color: #007bff;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.location-form-page .card {
+    border-radius: 10px;
+    background-color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.location-form-page .form-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.location-form-page .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+.location-form-page .btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+
+.location-form-page .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .location-form-page h1 {
+        font-size: 2rem;
+    }
+
+    .location-form-page .form-control {
+        font-size: 0.9rem;
+    }
+
+    .location-form-page .btn {
+        font-size: 1rem;
+    }
+}
+
+
+.btn-outline-secondary {
+    font-size: 1rem;
+   /*  padding: 0.5rem 1.5rem; */
+    
+}
+.btn-outline-danger {
+    font-size: 1rem;
+   /*  padding: 0.5rem 1.5rem; */
+    
+}
+
+.buttons-end {
+    display: flex;
+    justify-content: space-around;
+    margin: 2rem;
+}
+

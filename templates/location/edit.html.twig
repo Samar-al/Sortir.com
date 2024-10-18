@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{asset('css/location-form.css')}}">
+        {% endblock %}
+{% block title %}Modification du lieu{% endblock %}
+
+{% block body %}
+ {% include "fragments/_nav.html.twig" %}
+    <h1 class="text-center">Modification du lieu</h1>
+{% include "fragments/_flash_message.html.twig" %}
+    {{ include('location/_form.html.twig', {'button_label': 'Enregistrer'}) }}
+
+    <div class="buttons-end">
+        <div><a href="{{ path('app_location_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retours
+            </a></div>
+            
+        <div>{{ include('location/_delete_form.html.twig') }}</div>
+        
+    </div>
+{% endblock %}

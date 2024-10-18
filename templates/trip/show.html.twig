@@ -43,6 +43,12 @@
                                         <td class="fw-bold">Détails :</td>
                                         <td>{{ trip.tripDetails }}</td>
                                     </tr>
+                                    {% if trip.reasonCancel is not empty %}
+                                    <tr>
+                                        <td class="fw-bold">Motif d'annulation :</td>
+                                        <td>{{ trip.reasonCancel }}</td>
+                                    </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -120,12 +126,20 @@
     </div>
 
     <!-- Return Button -->
-    <div class="text-center my-4">
-        <a class="btn btn-primary px-5" href="{{ path('app_main_index') }}">Retour</a>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <a class="btn btn-primary" href="{{ app.request.headers.get('referer') ?: path('app_main_index') }}">Retour</a>
+        </div>
+        <div>
+            <a class="btn btn-outline-warning" href="{{ path('app_trip_edit', {'id': trip.id}) }}">edit</a>
+        </div>
+        <div>
+            {{ include('trip/_delete_form.html.twig') }}
+        </div>
     </div>
 </div>
 
-{#    <a href="{{ path('app_trip_edit', {'id': trip.id}) }}">edit</a>#}
+   
 
-{#    {{ include('trip/_delete_form.html.twig') }}#}
+   
 {% endblock %}

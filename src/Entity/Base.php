@@ -6,6 +6,7 @@ use App\Repository\BaseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BaseRepository::class)]
 class Base
@@ -15,6 +16,7 @@ class Base
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message:"Vous devez entrer le centre auquel vous êtes rattaché")]
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
