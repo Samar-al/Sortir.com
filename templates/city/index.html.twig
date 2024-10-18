@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Villes - Liste{% endblock %}
+
+{% block body %}
+    {% include "fragments/_nav.html.twig" %}
+
+    <div class="row my-4">
+        <h1 class='text-center'>Listes des villes</h1>
+    </div>
+    <div class="row">
+        <div class="col-6 offset-3">
+            {% include "fragments/_flash_message.html.twig" %}
+        </div>
+    </div>
+
+    <div class="container-fluid p-3">
+        <div class="row">
+            <div class="col-8 offset-2">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Nom de la ville</th>
+                                <th>Code postale</th>
+{#                                <th>Action</th>#}
+                            </tr>
+                        </thead>
+                        <tbody id="trips-tbody">
+                            {% for city in cities %}
+                                <tr>
+                                    <td>{{ city.id }}</td>
+                                    <td>{{ city.name }}</td>
+                                    <td>{{ city.zipCode }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a class="btn btn-primary" href="{{ path('app_city_new') }}">Ajouter</a>
+        </div>
+    </div>
+
+{% endblock %}
