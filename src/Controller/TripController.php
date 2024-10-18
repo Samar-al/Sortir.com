@@ -6,17 +6,15 @@ namespace App\Controller;
 use App\Entity\City;
 use App\Entity\Location;
 use App\Entity\Trip;
-use App\Event\TripRegistrationEvent;
 use App\Event\TripUnregistrationEvent;
 use App\Form\TripType;
 use App\Repository\CityRepository;
-
+use App\Event\TripRegistrationEvent;
 use App\Repository\StateRepository;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,10 +26,20 @@ final class TripController extends AbstractController
 
 
     #[Route('/', name: 'app_trip_index', methods: ['GET'])]
-    public function index(TripRepository $tripRepository): Response
+    public function index(Request $request,TripRepository $tripRepository): Response
     {
+        $search = $request->query->get('search');
+
+        if ($search) {
+            // Search for trips based on the name
+            $trips = $tripRepository->searchByName($search);
+        } else {
+            // If no search query, return all trips
+            $trips = $tripRepository->findAll();
+        }
+
         return $this->render('trip/index.html.twig', [
-            'trips' => $tripRepository->findAll(),
+            'trips' => $trips,
         ]);
     }
 
