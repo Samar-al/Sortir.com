@@ -4,8 +4,6 @@
 
 {% block body %}
  {% include "fragments/_nav.html.twig" %}
-  {% include "fragments/_flash_message.html.twig" %}
-
 
     <div class="text-center m-1">
         <div class="d-flex justify-content-center align-items-end mb-3">
@@ -20,6 +18,20 @@
     <div class="text-center mb-4">
         <h1 class="display-5">Gérer les Participants</h1>
     </div>
+
+     <div class="row">
+         <div class="col-6 offset-3">
+             {% include "fragments/_flash_message.html.twig" %}
+         </div>
+     </div>
+
+     <!-- Search Form -->
+    <form method="GET" action="{{ path('app_profile_index') }}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
+            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+        </div>
+    </form>
 
     <!-- Search Form -->
      <div class="mb-4">
@@ -66,7 +78,10 @@
                                 <a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                {{ include('profile/_delete_form.html.twig') }}
+
+                                {% if profile.mail != 'anonym@anonym.com' %}
+                                    {{ include('profile/_delete_form.html.twig') }}
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -74,7 +89,9 @@
             </tbody>
         </table>
         <div class="text-center">
+        
          <a class="btn btn-outline-danger" id="deactivate-button">Désactiver</a>
+
             <input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
         </div>
     </div>
