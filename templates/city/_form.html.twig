@@ -1,0 +1,11 @@
+{{ form_start(formCity) }}
+
+    {{ form_row(formCity.ZipCode) }}
+    {{ form_row(formCity.name) }}
+
+    {{ form_widget(formCity) }}
+    <div class="text-center">
+        <button class="btn btn-primary">{{ button_label|default('Créer') }}</button>
+
+    </div>
+{{ form_end(formCity) }}

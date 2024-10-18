@@ -16,7 +16,7 @@
             {% if is_granted ('IS_AUTHENTICATED_FULLY') %}   
              {% if "ROLE_ADMIN" in app.user.roles %}
                 <li class="nav-item ">
-                <a class="nav-link {% if "user" in app.request.get("_route") %} active {% endif %}" href="#"><i class="bi bi-person"></i> Villes</a>
+                <a class="nav-link {% if "user" in app.request.get("_route") %} active {% endif %}" href="{{ path('app_city_index') }}"><i class="bi bi-person"></i>Gérer les villes</a>
                 </li>
                 <li class="nav-item ">
                 <a class="nav-link {% if "user" in app.request.get("_route") %} active {% endif %}" href="#"><i class="bi bi-person"></i> Sites</a>
