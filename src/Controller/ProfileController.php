@@ -6,6 +6,7 @@ use App\Entity\Participant;
 use App\Form\ParticipantType;
 use App\Repository\BaseRepository;
 use App\Repository\ParticipantRepository;
+use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -47,6 +48,7 @@ final class ProfileController extends AbstractController
         ]);
     }
 
+
     #[Route('/ajouter', name: 'app_profile_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -67,6 +69,11 @@ final class ProfileController extends AbstractController
 
             $plainPassword = $formProfile->get('plainPassword')->getData();
             $confirmPassword = $formProfile->get('confirmPassword')->getData();
+
+            if (empty($plainPassword) || empty($confirmPassword)) {
+                $this->addFlash('danger', "Vous devez entrer un mot de passe");
+                return $this->redirectToRoute('app_profile_new', [], Response::HTTP_SEE_OTHER);
+            }
 
             if ($plainPassword !== $confirmPassword) {
                 $this->addFlash('danger', "Les mots de passe ne sont pas identiques.");
@@ -94,15 +101,14 @@ final class ProfileController extends AbstractController
                     $newFilename
                 );
 
-                // Store the filename in the session or pass it to the template
+                // Add a success flash message for the picture upload
+                $this->addFlash('success', 'Photo de profil téléchargée avec succès !');
             }
 
             // Success flash message for file upload
-            $this->addFlash('success', 'Le profil a été créé avec succès et la photo a été téléchargée.');
+            $this->addFlash('success', 'Le profil a été créé avec succès !');
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
-
-
 
         return $this->render('profile/new.html.twig', [
             'profile' => $profile,
@@ -114,6 +120,11 @@ final class ProfileController extends AbstractController
     #[Route('/{id}', name: 'app_profile_show', methods: ['GET'])]
     public function show(Participant $profile): Response
     {
+        if (!$this->isGranted("ROLE_ADMIN") && $profile->getMail() == 'anonym@anonym.com') {
+            $this->addFlash("danger", "Vous n'avez pas les droits suffisants!");
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
+
         $profilePicturesDir = $this->getParameter('profile_pictures_directory');
         $profilePicPath = $profilePicturesDir . '/profilepic' . $profile->getId();
 
@@ -211,10 +222,11 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/supprimer/{id}', name: 'app_profile_delete', methods: ['POST'])]
-    public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager,
+                           TripRepository $tripRepository, ParticipantRepository $participantRepository): Response
     {
 
-        if(!$this->isGranted("ROLE_ADMIN") ){
+        if(!$this->isGranted("ROLE_ADMIN" || $participant->getMail() == 'anonym@anonym.com') ){
             $this->addFlash("danger", "Vous n'avez pas les droits suffisants!");
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -222,6 +234,18 @@ final class ProfileController extends AbstractController
         if (!$this->isCsrfTokenValid('delete'.$participant->getId(), $request->getPayload()->getString('_token'))) {
             $this->addFlash("danger", "CSRF token n'est pas valide!");
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $tripsExist = $tripRepository->findBy(['organiser' => $participant->getId()]);
+
+        if (!empty($tripsExist)) {
+            $anonymParticipant = $participantRepository->findOneBy(['mail' => 'anonym@anonym.com']);
+
+            if (!empty($anonymParticipant)) {
+                foreach ($tripsExist as $trip) {
+                    $trip->setOrganiser($anonymParticipant);
+                }
+            }
         }
 
         $entityManager->remove($participant);

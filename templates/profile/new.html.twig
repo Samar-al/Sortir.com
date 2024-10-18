@@ -7,6 +7,13 @@
 <div class="row my-4">
     <div class="col-6 offset-3">
         <h1>Créer nouveau participant</h1>
+
+        <div class="row">
+            <div class="col-6 offset-3">
+                {% include "fragments/_flash_message.html.twig" %}
+            </div>
+        </div>
+
         <a class="btn btn-primary" href="{{ path('app_profile_index') }}">Retour à la liste</a>
     </div>
 </div>
