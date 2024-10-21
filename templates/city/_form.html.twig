@@ -1,9 +1,27 @@
+<div>
+    <label for="city_department" class="form-label mt-4">Département</label>
+    <select class="form-select" id="city_department" name="city_department">
+        <option value="" disabled selected>Sélectionner un département</option>
+        {% for department in departments %}
+            <option value="{{ department.code }}">{{ department.nom }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div>
+    <label for="cityName" class="form-label mt-4">Ville</label>
+    <select class="form-select" id="cityName" name="cityName">
+        <option value="" disabled selected>Sélectionner une ville</option>
+    </select>
+</div>
+
 {{ form_start(formCity) }}
 
     {{ form_row(formCity.ZipCode) }}
     {{ form_row(formCity.name) }}
 
     {{ form_widget(formCity) }}
+
     <div class="text-center">
         <button class="btn btn-primary">{{ button_label|default('Créer') }}</button>
 

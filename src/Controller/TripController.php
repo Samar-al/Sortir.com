@@ -131,6 +131,11 @@ final class TripController extends AbstractController
     #[Route('/modifier/{id}', name: 'app_trip_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
+        // Block edition if the trip state is not 'created'
+        if ($trip->getState()->getLabel() !== 'created') {
+            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie car elle n\'est plus à l\'état "créée".');
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
         // Check if the user is the organizer of the trip
         if ($this->getUser() !== $trip->getOrganiser()) {
             $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie, vous n\'en êtes pas l\'auteur!');
@@ -200,7 +205,6 @@ final class TripController extends AbstractController
             'formTrip' => $formTrip->createView(),
         ]);
     }
-
 
     #[Route('/supprimer/{id}', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response

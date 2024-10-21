@@ -73,24 +73,31 @@ class LocationType extends AbstractType
                 ]),
             ],
         ])
-        ->add('city', EntityType::class, [
-            'class' => City::class,
-            'choice_label' => 'name',
-            'label' => 'Ville',
-            'attr' => ['class' => 'form-select'],
-            'placeholder' => 'Sélectionnez une ville',
-            'constraints' => [
-                new NotBlank([
-                    'message' => 'La ville doit être sélectionnée.',
-                ]),
-            ],
-        ]);
+        ;
+
+        if ($options['is_admin']=== true) {
+            $builder
+                ->add('city', EntityType::class, [
+                    'class' => City::class,
+                    'choice_label' => 'name',
+                    'label' => 'Ville',
+                    'attr' => ['class' => 'form-select'],
+                    'placeholder' => 'Sélectionnez une ville',
+                    'constraints' => [
+                        new NotBlank([
+                            'message' => 'La ville doit être sélectionnée.',
+                        ]),
+                    ],
+                ]);
+        }
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Location::class,
+            'is_admin' => false,
         ]);
     }
 }
