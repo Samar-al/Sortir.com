@@ -221,11 +221,13 @@ final class ProfileController extends AbstractController
             'profilePicture' => $newFilename,
         ]);
     }
-
+    
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/supprimer/{id}', name: 'app_profile_delete', methods: ['POST'])]
     public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager,
                            TripRepository $tripRepository, ParticipantRepository $participantRepository): Response
     {
+        /** @var Participant $loggedInUser */
         $loggedInUser = $this->getUser();
          // Block deletion if the participant has the email anonym@anonym.com
         if ($participant->getMail() === 'anonym@anonym.com') {
