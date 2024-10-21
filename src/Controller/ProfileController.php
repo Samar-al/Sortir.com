@@ -7,6 +7,7 @@ use App\Form\ParticipantType;
 use App\Repository\BaseRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\TripRepository;
+use App\Service\PasswordManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -22,7 +23,12 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/profil')]
 final class ProfileController extends AbstractController
 {
-
+    private $passwordManager;
+    public function __construct(PasswordManager $passwordManager)
+    {
+        $this->passwordManager = $passwordManager;
+       
+    }
 
     #[Route(name: 'app_profile_index', methods: ['GET'])]
     public function index(Request $request, ParticipantRepository $participantRepository): Response
@@ -72,17 +78,11 @@ final class ProfileController extends AbstractController
             $plainPassword = $formProfile->get('plainPassword')->getData();
             $confirmPassword = $formProfile->get('confirmPassword')->getData();
 
-            if (empty($plainPassword) || empty($confirmPassword)) {
-                $this->addFlash('danger', "Vous devez entrer un mot de passe");
-                return $this->redirectToRoute('app_profile_new', [], Response::HTTP_SEE_OTHER);
-            }
+            // Validate passwords using the PasswordManager service
+            $error = $this->passwordManager->validatePasswords($plainPassword, $confirmPassword);
 
-            if ($plainPassword !== $confirmPassword) {
-                $this->addFlash('danger', "Les mots de passe ne sont pas identiques.");
-                return $this->redirectToRoute('app_profile_new', [], Response::HTTP_SEE_OTHER);
-            }
-
-            $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
+            // Hash the password using the PasswordManager service
+            $hashedPassword = $this->passwordManager->hashPassword($profile, $plainPassword);
             $profile->setPassword($hashedPassword);
 
             // Persist the profile first to get the ID
@@ -108,9 +108,8 @@ final class ProfileController extends AbstractController
             }
 
             // Success flash message for file upload
-            $this->addFlash('success', 'Le profil a été créé avec succès !');
-          //  $session = $request->getSession();
-          //  dd($session->getBag('flashes')); // Dumps all flash messages
+          $this->addFlash('success', 'Le profil a été créé avec succès !');
+          
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -190,25 +189,23 @@ final class ProfileController extends AbstractController
             $confirmPassword = $formProfileEdit->get('confirmPassword')->getData();
 
 
-            if(!empty($plainPassword)){
+            // Handle password using the PasswordManager service
+            if (!empty($plainPassword)) {
+                $error = $this->passwordManager->validatePasswords($plainPassword, $confirmPassword);
 
-                if ($plainPassword !== $confirmPassword)
-                {
-                   $this->addFlash("danger", "Les mots de passe ne sont pas identiques.");
-                    return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+                if ($error) {
+                    $this->addFlash("danger", $error);
+                    return $this->redirectToRoute('app_profile_edit', ['id' => $profile->getId()], Response::HTTP_SEE_OTHER);
                 }
-    
-                if (!$passwordHasher->isPasswordValid($user, $currentPassword))
-                {
+
+                if (!$this->passwordManager->isPasswordValid($user, $currentPassword)) {
                     $this->addFlash("danger", "Mot de passe incorrect.");
-                    return $this->redirectToRoute('app_profile_edit', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+                    return $this->redirectToRoute('app_profile_edit', ['id' => $profile->getId()], Response::HTTP_SEE_OTHER);
                 }
 
-                $plainPassword = $formProfileEdit->get('plainPassword')->getData();
-                $hashedPassword = $passwordHasher->hashPassword($profile, $plainPassword);
+                $hashedPassword = $this->passwordManager->hashPassword($profile, $plainPassword);
                 $profile->setPassword($hashedPassword);
             }
-
            
 
 
@@ -229,9 +226,16 @@ final class ProfileController extends AbstractController
     public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager,
                            TripRepository $tripRepository, ParticipantRepository $participantRepository): Response
     {
+        $loggedInUser = $this->getUser();
+         // Block deletion if the participant has the email anonym@anonym.com
+        if ($participant->getMail() === 'anonym@anonym.com') {
+            $this->addFlash("danger", "Vous ne pouvez pas supprimer cet utilisateur.");
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
 
-        if(!$this->isGranted("ROLE_ADMIN" || $participant->getMail() == 'anonym@anonym.com') ){
-            $this->addFlash("danger", "Vous n'avez pas les droits suffisants!");
+       // Check if the user is either ROLE_ADMIN or the owner of the account
+        if (!$this->isGranted('ROLE_ADMIN') && $loggedInUser->getId() !== $participant->getId()) {
+            $this->addFlash("danger", "Vous n'avez pas les droits suffisants pour supprimer cet utilisateur !");
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -337,26 +341,39 @@ final class ProfileController extends AbstractController
 
 
     #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
-    public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
     {
-        $data = json_decode($request->getContent(), true);
-        $participantIds = $data['participants'] ?? [];
-        $this->isCsrfTokenValid('deactivate_participants', $request->get('_token'));
-        if (!$participantIds) {
-            return new JsonResponse(['success' => false, 'message' => 'No participants selected.']);
+         // CSRF token validation for security
+        if (!$this->isCsrfTokenValid('deactivate_participants', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_profile_index');
         }
 
-        // Fetch the participants and deactivate them
-        $participants = $entityManager->getRepository(Participant::class)->findBy(['id' => $participantIds]);
+        // Get the selected participants from the form
+        $selectedParticipants = $request->request->all('participants');
+       // dd($selectedParticipants);
+        if (empty($selectedParticipants)) {
+            $this->addFlash('error', 'No participants selected for deactivation.');
+            return $this->redirectToRoute('app_profile_index');
+        }
 
-        foreach ($participants as $participant) {
-            $participant->setActive(false); 
-            $entityManager->persist($participant);
+        // Deactivate the selected participants
+        foreach ($selectedParticipants as $participantId) {
+            $participant = $participantRepository->find($participantId);
+            if ($participant) {
+                $participant->setActive(false); // Deactivate the participant
+                $entityManager->persist($participant);
+            }
         }
 
         $entityManager->flush();
 
-        return new JsonResponse(['success' => true]);
+        // Add a flash message to inform the user
+        $this->addFlash('success', 'Les participants séléctionnées on été désactivé');
+
+        // Redirect back to the profile index
+        return $this->redirectToRoute('app_profile_index');
+    
 
     }
 }
