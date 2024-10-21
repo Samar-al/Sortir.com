@@ -81,9 +81,10 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<div class="text-center">
-					<button type="submit" class="btn btn-outline-danger" id="deactivate-button">Désactiver</button>
-					<input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
+				<div class="d-flex justify-content-evenly align-self-center align-items-center">
+					<button type="submit" name="action" value="deactivate" class="btn btn-outline-danger">Désactiver</button>
+					<button type="submit" name="action" value="reactivate" class="btn btn-outline-success">Réactiver</button>
+					<input type="hidden" name="_token" value="{{ csrf_token('participant_action') }}">
 				</div>
 			</div>
 		</form>
