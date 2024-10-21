@@ -342,11 +342,11 @@ final class ProfileController extends AbstractController
     }    
 
 
-    #[Route('/deactivate-participants', name: 'app_profile_deactivate', methods: ['POST'])]
+    #[Route('/participant-action', name: 'app_profile_deactivate', methods: ['POST'])]
     public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
     {
          // CSRF token validation for security
-        if (!$this->isCsrfTokenValid('deactivate_participants', $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('participant_action', $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token.');
             return $this->redirectToRoute('app_profile_index');
         }
@@ -359,11 +359,57 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('app_profile_index');
         }
 
+        $action = $request->request->get('action');
+
+        // Deactivate the selected participants
+        foreach ($selectedParticipants as $participantId) {
+            $participant = $participantRepository->find($participantId);
+            if ($action === 'deactivate') {
+                $participant->setActive(false); // Deactivate the participant
+            } elseif ($action === 'reactivate') {
+                $participant->setActive(true); // Reactivate the participant
+            }
+           
+            $entityManager->persist($participant);
+            
+        }
+
+        $entityManager->flush();
+
+        // Add flash messages based on the action performed
+        if ($action === 'deactivate') {
+            $this->addFlash('success', 'Les participants sélectionnés ont été désactivés.');
+        } elseif ($action === 'reactivate') {
+            $this->addFlash('success', 'Les participants sélectionnés ont été réactivés.');
+        }
+        // Redirect back to the profile index
+        return $this->redirectToRoute('app_profile_index');
+    
+
+    }
+
+    #[Route('/reactivate-participants', name: 'app_profile_reactivate', methods: ['POST'])]
+    public function reactivateParticipants(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
+    {
+         // CSRF token validation for security
+        if (!$this->isCsrfTokenValid('reactivate_participants', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_profile_index');
+        }
+
+        // Get the selected participants from the form
+        $selectedParticipants = $request->request->all('participants');
+       // dd($selectedParticipants);
+        if (empty($selectedParticipants)) {
+            $this->addFlash('error', 'No participants selected for reactivation.');
+            return $this->redirectToRoute('app_profile_index');
+        }
+
         // Deactivate the selected participants
         foreach ($selectedParticipants as $participantId) {
             $participant = $participantRepository->find($participantId);
             if ($participant) {
-                $participant->setActive(false); // Deactivate the participant
+                $participant->setActive(true); // Deactivate the participant
                 $entityManager->persist($participant);
             }
         }
@@ -371,7 +417,7 @@ final class ProfileController extends AbstractController
         $entityManager->flush();
 
         // Add a flash message to inform the user
-        $this->addFlash('success', 'Les participants séléctionnées on été désactivé');
+        $this->addFlash('success', 'Les participants séléctionnées on été réactivés');
 
         // Redirect back to the profile index
         return $this->redirectToRoute('app_profile_index');
