@@ -9,6 +9,7 @@ use App\Repository\ParticipantRepository;
 use App\Repository\TripRepository;
 use App\Service\PasswordManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,7 +32,7 @@ final class ProfileController extends AbstractController
     }
 
     #[Route(name: 'app_profile_index', methods: ['GET'])]
-    public function index(Request $request, ParticipantRepository $participantRepository): Response
+    public function index(Request $request, ParticipantRepository $participantRepository, PaginatorInterface $paginator): Response
     {
         
         if (!$this->isGranted("ROLE_ADMIN"))
@@ -39,6 +40,11 @@ final class ProfileController extends AbstractController
             $this->addFlash('danger', 'Vous n\'avez pas les droits suffisant pour aller à cette page!');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
+
+        // Get the current page number (default is 1)
+        $page = $request->query->getInt('page', 1);
+        $limit = 10;
+
 
         $query = $request->query->get('q', '');
 
@@ -49,9 +55,17 @@ final class ProfileController extends AbstractController
             // Retrieve all participants if no search query is present
             $participants = $participantRepository->findAll();
         }
+
+        // Paginate the results of the query
+        $pagination = $paginator->paginate(
+            $participants, // The query to paginate
+            $page,              // Current page number, passed as a GET parameter
+            $limit              // Limit of participants per page
+        );
+
     
         return $this->render('profile/index.html.twig', [
-            'profiles' => $participants,
+            'pagination' => $pagination,
           
         ]);
     }

@@ -6,6 +6,7 @@ use App\Entity\Location;
 use App\Form\LocationType;
 use App\Repository\LocationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +31,7 @@ class LocationController extends AbstractController
     }
 
     #[Route('/lieu', name: 'app_location_index', methods: ['GET'])]
-    public function index(Request $request, LocationRepository $locationRepository): Response
+    public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator): Response
     {
       
         $query = $request->query->get('q', '');
@@ -42,8 +43,14 @@ class LocationController extends AbstractController
             // Retrieve all locations if no search query is present
             $locations = $locationRepository->findAll();
         }
+         // Paginate the results
+        $pagination = $paginator->paginate(
+            $locations, // The query or query builder to paginate
+            $request->query->getInt('page', 1), // Current page number, defaults to 1
+            10 // Limit the number of entries per page to 10
+        );
         return $this->render('location/index.html.twig', [
-            'locations' => $locations,
+            'pagination' => $pagination,
         ]);
     }
    
@@ -59,6 +66,7 @@ class LocationController extends AbstractController
             $entityManager->persist($location);
             $entityManager->flush();
 
+            $this->addFlash("success", "Vous avez ajouté un lieu avec succès !");
             return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
         }
 

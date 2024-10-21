@@ -55,7 +55,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{% for profile in profiles %}
+						{% for profile in pagination.items %}
 							<tr class="table-primary">
 								<td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
 								<td>{{ profile.id }}</td>
@@ -81,7 +81,11 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<div class="d-flex justify-content-evenly align-self-center align-items-center">
+				{# Pagination controls #}
+				<div class="navigation">
+					{{ knp_pagination_render(pagination) }}
+				</div>
+				<div class="d-flex justify-content-evenly align-self-center align-items-center my-3">
 					<button type="submit" name="action" value="deactivate" class="btn btn-outline-danger">Désactiver</button>
 					<button type="submit" name="action" value="reactivate" class="btn btn-outline-success">Réactiver</button>
 					<input type="hidden" name="_token" value="{{ csrf_token('participant_action') }}">

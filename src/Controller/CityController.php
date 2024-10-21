@@ -6,6 +6,7 @@ use App\Entity\City;
 use App\Form\CityType;
 use App\Repository\CityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,16 +20,25 @@ final class CityController extends AbstractController
 {
 
     #[Route(name: 'app_city_index', methods: ['GET'])]
-    public function index(CityRepository $cityRepository, Request $request): Response
+    public function index(CityRepository $cityRepository, PaginatorInterface $paginator, Request $request): Response
     {
+    
         $search = $request->query->get('search');
         if ($search) {
             $cities = $cityRepository->searchByName($search);
         } else {
             $cities = $cityRepository->findAll();
         }
+
+        // Paginate the results of the query
+        $pagination = $paginator->paginate(
+            $cities, // The query or query builder to paginate
+            $request->query->getInt('page', 1), // Current page number, default is 1
+            10 // Limit the number of entries per page
+        );
+
         return $this->render('city/index.html.twig', [
-            'cities' => $cities,
+            'pagination' => $pagination,
         ]);
     }
 

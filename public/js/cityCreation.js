@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     departmentSelect.addEventListener('change', function() {
         let departmentCode = departmentSelect.value;
 
-        fetch(`/city/get-cities/${departmentCode}`)
+        fetch(`/ville/get-cities/${departmentCode}`)
         .then(response => response.json())
         .then(data => {
                 citySelect.innerHTML = '';

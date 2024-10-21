@@ -1,71 +1,79 @@
 {% extends 'base.html.twig' %}
 {% block stylesheets %}
-  <link rel="stylesheet" href="{{asset('css/location-style.css')}}">
-        {% endblock %}
-{% block title %}Liste de Lieux{% endblock %}
+	<link rel="stylesheet" href="{{asset('css/location-style.css')}}">
+{% endblock %}
+{% block title %}Liste de Lieux
+{% endblock %}
 
 {% block body %}
- {% include "fragments/_nav.html.twig" %}
- <div class="container my-4">
-    <div class="text-center mb-4">
-        <h1 class="display-5">Liste de Lieux</h1>
-    </div>
+	{% include "fragments/_nav.html.twig" %}
+	<div class="container my-4">
+		<div class="text-center mb-4">
+			<h1 class="display-5">Liste de Lieux</h1>
+		</div>
+		<div class="row">
+			<div class="col-6 offset-3">
+				{% include "fragments/_flash_message.html.twig" %}
+			</div>
+		</div>
+		<!-- Search Form -->
 
-    <!-- Search Form -->
+		<div class="mb-4">
+			<form method="GET" action="{{ path('app_location_index') }}" class="d-flex">
+				<input type="text" name="q" class="form-control me-2" placeholder="Rechercher un lieu..." value="{{ app.request.get('q') }}">
+				<button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+			</form>
+		</div>
 
-    <div class="mb-4">
-        <form method="GET" action="{{ path('app_location_index') }}" class="d-flex">
-            <input type="text" name="q" class="form-control me-2" placeholder="Rechercher un lieu..." value="{{ app.request.get('q') }}">
-            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
-        </form>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Street Number</th>
-                    <th>Street Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for location in locations %}
-                    <tr>
-                        <td>{{ location.id }}</td>
-                        <td>{{ location.name }}</td>
-                        <td>{{ location.latitude }}</td>
-                        <td>{{ location.longitude }}</td>
-                        <td>{{ location.streetNumber }}</td>
-                        <td>{{ location.streetName }}</td>
-                        <td>
-                            <div class="d-flex justify-content-around flex-wrap">
-                                <a href="{{ path('app_location_show', {'id': location.id}) }}" class="btn btn-outline-info m-1">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ path('app_location_edit', {'id': location.id}) }}" class="btn btn-outline-warning m-1">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                {{ include('location/_delete_form.html.twig') }}
-                            </div>
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center">No records found</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="text-center mt-4">
-        <a href="{{ path('app_location_new') }}" class="btn btn-primary">Ajouter un lieu</a>
-    </div>
-</div>
+		<div class="table-responsive">
+			<table class="table table-hover table-bordered">
+				<thead class="table-dark">
+					<tr>
+						<th>Id</th>
+						<th>Name</th>
+						<th>Latitude</th>
+						<th>Longitude</th>
+						<th>Street Number</th>
+						<th>Street Name</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for location in pagination.items %}
+						<tr>
+							<td>{{ location.id }}</td>
+							<td>{{ location.name }}</td>
+							<td>{{ location.latitude }}</td>
+							<td>{{ location.longitude }}</td>
+							<td>{{ location.streetNumber }}</td>
+							<td>{{ location.streetName }}</td>
+							<td>
+								<div class="d-flex justify-content-around flex-wrap">
+									<a href="{{ path('app_location_show', {'id': location.id}) }}" class="btn btn-outline-info m-1">
+										<i class="bi bi-eye"></i>
+									</a>
+									<a href="{{ path('app_location_edit', {'id': location.id}) }}" class="btn btn-outline-warning m-1">
+										<i class="bi bi-pencil"></i>
+									</a>
+									{{ include('location/_delete_form.html.twig') }}
+								</div>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="7" class="text-center">No records found</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{# Pagination Controls #}
+		<div class="pagination">
+			{{ knp_pagination_render(pagination) }}
+		</div>
+		<div class="text-center mt-4">
+			<a href="{{ path('app_location_new') }}" class="btn btn-primary">Ajouter un lieu</a>
+		</div>
+	</div>
 
 {% endblock %}
