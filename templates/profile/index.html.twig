@@ -27,6 +27,7 @@
 			</div>
 		</div>
 
+
 		<!-- Search Form -->
 		<div class="mb-4">
 			<form method="GET" action="{{ path('app_profile_index') }}" class="d-flex">
@@ -36,112 +37,56 @@
 		</div>
 
 		<!-- Participant Table -->
-		<div class="table-responsive">
-			<table class="table table-hover table-bordered">
-				<thead class="table-dark">
-					<tr>
-						<th scope="col">#</th>
-						<th scope="col">ID</th>
-						<th scope="col">Prénom</th>
-						<th scope="col">Nom de famille</th>
-						<th scope="col">Nom d'utilisateur</th>
-						<th scope="col">Email</th>
-						<th scope="col">Téléphone</th>
-						<th scope="col">Admin</th>
-						<th scope="col">Actif</th>
-						<th scope="col">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for profile in profiles %}
-						<tr class="table-primary">
-							<td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
-							<td>{{ profile.id }}</td>
-							<td>{{ profile.firstname }}</td>
-							<td>{{ profile.lastname }}</td>
-							<td>{{ profile.username }}</td>
-							<td>{{ profile.mail }}</td>
-							<td>{{ profile.phoneNumber }}</td>
-							<td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
-							<td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
-							<td>
-								<div class="d-flex justify-content-center">
-									<a class="btn btn-outline-primary me-2" href="{{ path('app_profile_show', {'id': profile.id}) }}">
-										<i class="bi bi-eye"></i>
-									</a>
-									<a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
-										<i class="bi bi-pencil"></i>
-									</a>
-									{{ include('profile/_delete_form.html.twig') }}
-								</div>
-							</td>
+		<form action="{{ path('app_profile_deactivate') }}" method="POST">
+			<div class="table-responsive">
+				<table class="table table-hover table-bordered">
+					<thead class="table-dark">
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">ID</th>
+							<th scope="col">Prénom</th>
+							<th scope="col">Nom de famille</th>
+							<th scope="col">Nom d'utilisateur</th>
+							<th scope="col">Email</th>
+							<th scope="col">Téléphone</th>
+							<th scope="col">Admin</th>
+							<th scope="col">Actif</th>
+							<th scope="col">Actions</th>
 						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-			<div class="text-center">
-				<a class="btn btn-outline-danger" id="deactivate-button">Désactiver</a>
-				<input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
+					</thead>
+					<tbody>
+						{% for profile in profiles %}
+							<tr class="table-primary">
+								<td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
+								<td>{{ profile.id }}</td>
+								<td>{{ profile.firstname }}</td>
+								<td>{{ profile.lastname }}</td>
+								<td>{{ profile.username }}</td>
+								<td>{{ profile.mail }}</td>
+								<td>{{ profile.phoneNumber }}</td>
+								<td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
+								<td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
+								<td>
+									<div class="d-flex justify-content-center">
+										<a class="btn btn-outline-primary me-2" href="{{ path('app_profile_show', {'id': profile.id}) }}">
+											<i class="bi bi-eye"></i>
+										</a>
+										<a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
+											<i class="bi bi-pencil"></i>
+										</a>
+										{{ include('profile/_delete_form.html.twig') }}
+									</div>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div class="text-center">
+					<button type="submit" class="btn btn-outline-danger" id="deactivate-button">Désactiver</button>
+					<input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
+				</div>
 			</div>
-		</div>
-	</div>
-	<!-- Participant Table -->
-	<div class="table-responsive">
-		<table class="table table-hover table-bordered">
-			<thead class="table-dark">
-				<tr>
-					<th scope="col">#</th>
-					<th scope="col">ID</th>
-					<th scope="col">Prénom</th>
-					<th scope="col">Nom de famille</th>
-					<th scope="col">Nom d'utilisateur</th>
-					<th scope="col">Email</th>
-					<th scope="col">Téléphone</th>
-					<th scope="col">Admin</th>
-					<th scope="col">Actif</th>
-					<th scope="col">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for profile in profiles %}
-					<tr class="table-primary">
-						<td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
-						<td>{{ profile.id }}</td>
-						<td>{{ profile.firstname }}</td>
-						<td>{{ profile.lastname }}</td>
-						<td>{{ profile.username }}</td>
-						<td>{{ profile.mail }}</td>
-						<td>{{ profile.phoneNumber }}</td>
-						<td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
-						<td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
-						<td>
-							<div class="d-flex justify-content-center">
-								<a class="btn btn-outline-primary me-2" href="{{ path('app_profile_show', {'id': profile.id}) }}">
-									<i class="bi bi-eye"></i>
-								</a>
-								<a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
-									<i class="bi bi-pencil"></i>
-								</a>
-
-								{% if profile.mail != 'anonym@anonym.com' %}
-									{{ include('profile/_delete_form.html.twig') }}
-								{% endif %}
-							</div>
-						</td>
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		<div class="text-center">
-
-			<a class="btn btn-outline-danger" id="deactivate-button">Désactiver</a>
-
-			<input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
-		</div>
-	</div>
-</div>
+		</form>
 
 
-{% block javascripts %}
-	<script src="{{asset('js/deactivate-participant.js')}}"></script>
-{% endblock %}{% endblock %}
+	{% endblock %}
