@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Group
+{% endblock %}
+
+{% block body %}
+	{% include "fragments/_nav.html.twig" %}
+	<div class="row">
+		<div class="col-6 offset-3">
+			{% include "fragments/_flash_message.html.twig" %}
+		</div>
+	</div>
+
+	<div class="container-fluid p-3">
+		<div class="row">
+			<div class="col-8 offset-2">
+				<h1>Mes Groupes</h1>
+
+				<div class="table-responsive">
+					<table class="table table-bordered table-striped">
+						<thead class="table-dark">
+							<tr>
+								<th>Nom</th>
+								<th>Créateur</th>
+								<th>Nombre de Membres</th>
+								<th>Role</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for group in groups %}
+								<tr>
+									<td>
+										<a href="{{ path('app_group_show', {'id': group.id}) }}">
+											{{ group.name }}
+										</a>
+									</td>
+									<td>{{ group.owner.firstname }}
+										{{ group.owner.lastname }}</td>
+									<td>{{ group.members|length }}</td>
+									<td>
+										{% if group.owner == app.user %}
+											<span class="badge bg-primary">Owner</span>
+										{% else %}
+											<span class="badge bg-secondary">Member</span>
+										{% endif %}
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+
+				<div class="pagination">
+					{{ knp_pagination_render(groups) }}
+				</div>
+
+			</div>
+		</div>
+		<div class="text-center">
+			<a class="btn btn-primary" href="{{ path('app_group_new') }}">Ajouter</a>
+		</div>
+	</div>
+
+
+{% endblock %}
