@@ -1,105 +1,97 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Participant - Gérer{% endblock %}
+{% block title %}Participant - Gérer
+{% endblock %}
 
 {% block body %}
- {% include "fragments/_nav.html.twig" %}
+	{% include "fragments/_nav.html.twig" %}
 
-    <div class="text-center m-1">
-        <div class="d-flex justify-content-center align-items-end mb-3">
-            <a class="btn btn-primary ms-2 d-inline-flex align-items-center" href="{{ path('app_profile_new') }}">
-                <i class="bi bi-plus-lg me-2"></i> Ajouter
-            </a>
-            {% include "profile/_upload_form.html.twig" %}
-        </div>
-    </div>
+	<div class="text-center m-1">
+		<div class="d-flex justify-content-center align-items-end mb-3">
+			<a class="btn btn-primary ms-2 d-inline-flex align-items-center" href="{{ path('app_profile_new') }}">
+				<i class="bi bi-plus-lg me-2"></i>
+				Ajouter
+			</a>
+			{% include "profile/_upload_form.html.twig" %}
+		</div>
+	</div>
 
- <div class="container my-4">
-    <div class="text-center mb-4">
-        <h1 class="display-5">Gérer les Participants</h1>
-    </div>
+	<div class="container my-4">
+		<div class="text-center mb-4">
+			<h1 class="display-5">Gérer les Participants</h1>
+		</div>
 
-     <div class="row">
-         <div class="col-6 offset-3">
-             {% include "fragments/_flash_message.html.twig" %}
-         </div>
-     </div>
-
-     <!-- Search Form -->
-    <form method="GET" action="{{ path('app_profile_index') }}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
-            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
-        </div>
-    </form>
-
-    <!-- Search Form -->
-     <div class="mb-4">
-         <form method="GET" action="{{ path('app_profile_index') }}" class="d-flex"> 
-            <input type="text" name="q" class="form-control me-2" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
-            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>     
-        </form>
-    </div>
-
-    <!-- Participant Table -->
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">Prénom</th>
-                    <th scope="col">Nom de famille</th>
-                    <th scope="col">Nom d'utilisateur</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Téléphone</th>
-                    <th scope="col">Admin</th>
-                    <th scope="col">Actif</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for profile in profiles %}
-                    <tr class="table-primary">
-                        <td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
-                        <td>{{ profile.id }}</td>
-                        <td>{{ profile.firstname }}</td>
-                        <td>{{ profile.lastname }}</td>
-                        <td>{{ profile.username }}</td>
-                        <td>{{ profile.mail }}</td>
-                        <td>{{ profile.phoneNumber }}</td>
-                        <td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
-                        <td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
-                        <td>
-                            <div class="d-flex justify-content-center">
-                                <a class="btn btn-outline-primary me-2" href="{{ path('app_profile_show', {'id': profile.id}) }}">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-
-                                {% if profile.mail != 'anonym@anonym.com' %}
-                                    {{ include('profile/_delete_form.html.twig') }}
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="text-center">
-        
-         <a class="btn btn-outline-danger" id="deactivate-button">Désactiver</a>
-
-            <input type="hidden" name="_token" value="{{ csrf_token('deactivate_participants') }}">
-        </div>
-    </div>
-</div>
+		<div class="row">
+			<div class="col-6 offset-3">
+				{% include "fragments/_flash_message.html.twig" %}
+			</div>
+		</div>
 
 
+		<!-- Search Form -->
+		<div class="mb-4">
+			<form method="GET" action="{{ path('app_profile_index') }}" class="d-flex">
+				<input type="text" name="q" class="form-control me-2" placeholder="Rechercher un participant..." value="{{ app.request.get('q') }}">
+				<button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+			</form>
+		</div>
 
-    {% block javascripts %}
-            <script src="{{asset('js/deactivate-participant.js')}}"></script>
-        {% endblock %}
-{% endblock %}
+		<!-- Participant Table -->
+		<form action="{{ path('app_profile_deactivate') }}" method="POST">
+			<div class="table-responsive">
+				<table class="table table-hover table-bordered">
+					<thead class="table-dark">
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">ID</th>
+							<th scope="col">Prénom</th>
+							<th scope="col">Nom de famille</th>
+							<th scope="col">Nom d'utilisateur</th>
+							<th scope="col">Email</th>
+							<th scope="col">Téléphone</th>
+							<th scope="col">Admin</th>
+							<th scope="col">Actif</th>
+							<th scope="col">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for profile in pagination.items %}
+							<tr class="table-primary">
+								<td><input type="checkbox" name="participants[]" value="{{ profile.id }}"></td>
+								<td>{{ profile.id }}</td>
+								<td>{{ profile.firstname }}</td>
+								<td>{{ profile.lastname }}</td>
+								<td>{{ profile.username }}</td>
+								<td>{{ profile.mail }}</td>
+								<td>{{ profile.phoneNumber }}</td>
+								<td>{{ profile.isAdmin ? 'Oui' : 'Non' }}</td>
+								<td>{{ profile.isActive ? 'Oui' : 'Non' }}</td>
+								<td>
+									<div class="d-flex justify-content-center">
+										<a class="btn btn-outline-primary me-2" href="{{ path('app_profile_show', {'id': profile.id}) }}">
+											<i class="bi bi-eye"></i>
+										</a>
+										<a class="btn btn-outline-warning me-2" href="{{ path('app_profile_edit', {'id': profile.id}) }}">
+											<i class="bi bi-pencil"></i>
+										</a>
+										{{ include('profile/_delete_form.html.twig') }}
+									</div>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{# Pagination controls #}
+				<div class="navigation">
+					{{ knp_pagination_render(pagination) }}
+				</div>
+				<div class="d-flex justify-content-evenly align-self-center align-items-center my-3">
+					<button type="submit" name="action" value="deactivate" class="btn btn-outline-danger">Désactiver</button>
+					<button type="submit" name="action" value="reactivate" class="btn btn-outline-success">Réactiver</button>
+					<input type="hidden" name="_token" value="{{ csrf_token('participant_action') }}">
+				</div>
+			</div>
+		</form>
+
+
+	{% endblock %}

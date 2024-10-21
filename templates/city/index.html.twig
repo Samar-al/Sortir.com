@@ -1,61 +1,66 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Villes - Liste{% endblock %}
+{% block title %}Villes - Liste
+{% endblock %}
 
 {% block body %}
-    {% include "fragments/_nav.html.twig" %}
+	{% include "fragments/_nav.html.twig" %}
 
-    <div class="row my-4">
-        <h1 class='text-center'>Listes des villes</h1>
-    </div>
-    <div class="row">
-        <div class="col-6 offset-3">
-            {% include "fragments/_flash_message.html.twig" %}
-        </div>
-    </div>
+	<div class="row my-4">
+		<h1 class='text-center'>Listes des villes</h1>
+	</div>
+	<div class="row">
+		<div class="col-6 offset-3">
+			{% include "fragments/_flash_message.html.twig" %}
+		</div>
+	</div>
 
-    <div class="container-fluid p-3">
-    <div class="row">
-        <div class="col-8 offset-2">
-            <div class="mb-4">
-                {# Add a search bar form #}
-                <form method="GET" action="{{ path('app_city_index') }}" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Rechercher une ville par nom" value="{{ app.request.query.get('search') }}">
-                    <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
-                </form>
-            </div>
+	<div class="container-fluid p-3">
+		<div class="row">
+			<div class="col-8 offset-2">
+				<div
+					class="mb-4">
+					{# Add a search bar form #}
+					<form method="GET" action="{{ path('app_city_index') }}" class="d-flex">
+						<input type="text" name="search" class="form-control me-2" placeholder="Rechercher une ville par nom" value="{{ app.request.query.get('search') }}">
+						<button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+					</form>
+				</div>
 
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Nom de la ville</th>
-                            <th>Code postale</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trips-tbody">
-                        {% for city in cities %}
-                            <tr>
-                                <td>{{ city.id }}</td>
-                                <td>{{ city.name }}</td>
-                                <td>{{ city.zipCode }}</td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="3" class="text-center">Aucune ville trouvée</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="text-center">
-        <a class="btn btn-primary" href="{{ path('app_city_new') }}">Ajouter</a>
-    </div>
-</div>
+				<div class="table-responsive">
+					<table class="table table-hover table-bordered table-striped">
+						<thead class="table-dark">
+							<tr>
+								<th>#</th>
+								<th>Nom de la ville</th>
+								<th>Code postale</th>
+							</tr>
+						</thead>
+						<tbody id="trips-tbody">
+							{% for city in pagination.items %}
+								<tr>
+									<td>{{ city.id }}</td>
+									<td>{{ city.name }}</td>
+									<td>{{ city.zipCode }}</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="3" class="text-center">Aucune ville trouvée</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		{# Pagination Controls #}
+		<div class="pagination">
+			{{ knp_pagination_render(pagination) }}
+		</div>
+		<div class="text-center">
+			<a class="btn btn-primary" href="{{ path('app_city_new') }}">Ajouter</a>
+		</div>
+	</div>
 
 
 {% endblock %}
