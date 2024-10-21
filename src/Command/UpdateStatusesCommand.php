@@ -60,20 +60,27 @@ class UpdateStatusesCommand extends Command
             // Calculate the end of the trip by adding the duration to `dateHourStart`
             $dateHourEnd = (clone $dateHourStart)->modify("+{$durationInHours} hours");
 
-
             // Ensure the comparison is done only on 'Y-m-d H:i' precision
             $formattedStart = $dateHourStart->format('Y-m-d H:i');
             $formattedNow = $now->format('Y-m-d H:i');
             $formattedEnd = $dateHourEnd->format('Y-m-d H:i');
 
-            // 1. If 1 month has passed since `dateHourStart`, archive the trip
+            // 1. If the number of participants has reached or exceeded the max allowed, set the state to 'closed'
+            if (count($trip->getParticipants()) >= $trip->getNumMaxRegistration() && $trip->getState()->getLabel() !== 'closed') {
+                $closedState = $this->tripRepository->findStateByLabel('closed');
+                if ($closedState) {
+                    $trip->setState($closedState);
+                }
+            }
+
+            // 2. If 1 month has passed since `dateHourStart`, archive the trip
             $oneMonthAfterStart = (clone $dateHourStart)->modify('+1 month');
             if ($oneMonthAfterStart <= $now) {
                 $trip->setArchived(true);
                
             }
 
-             // 2. If current time is between `dateHourStart` and `dateHourEnd`, set the state to 'activity in progress'
+             // 3. If current time is between `dateHourStart` and `dateHourEnd`, set the state to 'activity in progress'
             if ($formattedStart <= $formattedNow && $formattedNow < $formattedEnd) {
                 $inProgressState = $this->tripRepository->findStateByLabel('activity in progress');
                 if ($inProgressState) {
@@ -83,7 +90,7 @@ class UpdateStatusesCommand extends Command
             } 
 
 
-            // 3. If `dateHourEnd` is in the past, set the state to 'passed'
+            // 4. If `dateHourEnd` is in the past, set the state to 'passed'
             if ($dateHourEnd < $now) {
                 $passedState = $this->tripRepository->findStateByLabel('passed');
                 if ($passedState) {
@@ -92,14 +99,16 @@ class UpdateStatusesCommand extends Command
                 }
             }
 
-            // 4. If `dateRegistrationLimit` is reached and the state is not 'closed'
-            if ($dateRegistrationLimit <= $now && $trip->getState()->getLabel() !== 'closed') {
+            // 5. If `dateRegistrationLimit` is reached and the state is not 'closed'
+            if ($dateRegistrationLimit <= $now && $trip->getState()->getLabel() == 'open') {
                 $closedState = $this->tripRepository->findStateByLabel('closed');
                 if ($closedState) {
                     $trip->setState($closedState);
                     
                 }
             }
+
+            
         }
 
         // Persist the changes to the database

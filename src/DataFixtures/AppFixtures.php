@@ -25,15 +25,15 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Faker\Factory::create("en_US");
+        $faker = Faker\Factory::create("fr_FR");
         $populator = new \Faker\ORM\Doctrine\Populator($faker, $manager);
 
         // Create and persist City entities
         $cities = [];
         for ($i = 0; $i < 10; $i++) {
             $city = new City();
-            $city->setName($faker->city);
-            $city->setZipCode($faker->postcode);
+            $city->setName($faker->city());
+            $city->setZipCode($faker->postcode());
             $manager->persist($city);
             $cities[] = $city;
         }
@@ -54,6 +54,7 @@ class AppFixtures extends Fixture
             'closed' => new State(),
             'in progress' => new State(),
             'passed' => new State(),
+            'cancelled' => new State(),
         ];
         foreach ($states as $label => $state) {
             $state->setLabel($label);
@@ -67,7 +68,7 @@ class AppFixtures extends Fixture
         // Populate Locations
         $populator->addEntity(Location::class, 10, [
             'name' => function () use ($faker) {
-                return $faker->streetName;
+                return $faker->sentence(3);
             },
             'latitude' => function () use ($faker) {
                 return $faker->latitude;
@@ -105,7 +106,7 @@ class AppFixtures extends Fixture
             },
             'roles' => ['ROLE_USER'],
             'phoneNumber' => function () use ($faker) {
-                return $faker->phoneNumber;
+                return $faker->mobileNumber();
             },
             'base' => function() use ($bases) {
                 return $bases[array_rand($bases)]; 
@@ -151,7 +152,7 @@ class AppFixtures extends Fixture
             $dateHourStart = \DateTimeImmutable::createFromMutable($faker->dateTimeBetween('+1 week', '+1 month'));
             $trip->setDateHourStart($dateHourStart);
 
-            $duration = $faker->numberBetween(1, 90); // Duration in minutes
+            $duration = $faker->numberBetween(1, 90); // Duration in hours
             $trip->setDuration($duration);
 
             $dateRegistrationLimit = \DateTimeImmutable::createFromMutable($faker->dateTimeBetween('-1 week', '+2 weeks'));
@@ -172,12 +173,12 @@ class AppFixtures extends Fixture
 
             // Determine the state based on the current date and trip dates
             $currentDate = new \DateTimeImmutable();
-            $dateHourEnd = $dateHourStart->modify("+{$duration} minutes");
+            $dateHourEnd = $dateHourStart->modify("+{$duration} hours");
 
             if ($currentDate > $dateHourEnd) {
                 $trip->setState($states['passed']);
             } elseif ($currentDate >= $dateHourStart && $currentDate <= $dateHourEnd) {
-                $trip->setState($states['in progress']);
+                $trip->setState($states['activity in progress']);
             } elseif ($currentDate > $dateRegistrationLimit) {
                 $trip->setState($states['closed']);
             } else {
