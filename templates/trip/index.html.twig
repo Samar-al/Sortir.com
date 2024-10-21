@@ -1,78 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Sorties - Liste{% endblock %}
+{% block title %}Sorties - Liste
+{% endblock %}
 
 {% block body %}
- {% include "fragments/_nav.html.twig" %}
- {% include "fragments/_flash_message.html.twig" %}
+	{% include "fragments/_nav.html.twig" %}
+	{% include "fragments/_flash_message.html.twig" %}
 
-<div class="container my-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class='text-center'>Liste des sorties</h1>
-                <a class="btn btn-primary" href="{{ path('app_trip_new') }}">
-                    <i class="bi bi-plus-lg"></i> Ajouter
-                </a>
-            </div>
-            
-            {# Add search form #}
-              <div class="mb-4">
-                <form method="GET" action="{{ path('app_trip_index') }}" class="d-flex">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher par nom de sortie..." value="{{ app.request.query.get('search') }}">
-                    <button class="btn btn-outline-secondary" type="submit">Rechercher</button>     
-                </form>
-             </div>
-               
+	<div class="container my-4">
+		<div class="row justify-content-center">
+			<div class="col-lg-10 col-md-10">
+				<div class="d-flex justify-content-between align-items-center mb-4">
+					<h1 class='text-center'>Liste des sorties</h1>
+					<a class="btn btn-primary" href="{{ path('app_trip_new') }}">
+						<i class="bi bi-plus-lg"></i>
+						Ajouter
+					</a>
+				</div>
 
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Id</th>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Duration (hours)</th>
-                            <th>Registration Limit</th>
-                            <th>Max Participants</th>
-                            <th>Details</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for trip in trips %}
-                        <tr>
-                            <td>{{ trip.id }}</td>
-                            <td>{{ trip.name }}</td>
-                            <td>{{ trip.dateHourStart ? trip.dateHourStart|date('d/m/Y H:i') : '' }}</td>
-                            <td>{{ trip.duration }}</td>
-                            <td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('d/m/Y H:i') : '' }}</td>
-                            <td>{{ trip.numMaxRegistration }}</td>
-                            <td>{{ trip.tripDetails }}</td>
-                            <td>
-                                <div class="d-flex justify-content-around align-items-center">
-                                    <a class="btn btn-outline-primary m-1" href="{{ path('app_trip_show', {'id': trip.id}) }}">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a class="btn btn-outline-warning m-1" href="{{ path('app_trip_edit', {'id': trip.id}) }}">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    {{ include('trip/_delete_form.html.twig') }}
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="8" class="text-center">No records found</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+				{# Add search form #}
+				<div class="mb-4">
+					<form method="GET" action="{{ path('app_trip_index') }}" class="d-flex">
+						<input type="text" name="search" class="form-control" placeholder="Rechercher par nom de sortie..." value="{{ app.request.query.get('search') }}">
+						<button class="btn btn-outline-secondary" type="submit">Rechercher</button>
+					</form>
+				</div>
 
 
-   
+				<div class="table-responsive">
+					<table class="table table-hover table-bordered">
+						<thead class="table-dark">
+							<tr>
+								<th>Id</th>
+								<th>Name</th>
+								<th>Date</th>
+								<th>Duration (hours)</th>
+								<th>Registration Limit</th>
+								<th>Max Participants</th>
+								<th>Details</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for trip in pagination.items %}
+								<tr>
+									<td>{{ trip.id }}</td>
+									<td>{{ trip.name }}</td>
+									<td>{{ trip.dateHourStart ? trip.dateHourStart|date('d/m/Y H:i') : '' }}</td>
+									<td>{{ trip.duration }}</td>
+									<td>{{ trip.dateRegistrationLimit ? trip.dateRegistrationLimit|date('d/m/Y H:i') : '' }}</td>
+									<td>{{ trip.numMaxRegistration }}</td>
+									<td>{{ trip.tripDetails }}</td>
+									<td>
+										<div class="d-flex justify-content-around align-items-center">
+											<a class="btn btn-outline-primary m-1" href="{{ path('app_trip_show', {'id': trip.id}) }}">
+												<i class="bi bi-eye"></i>
+											</a>
+											<a class="btn btn-outline-warning m-1" href="{{ path('app_trip_edit', {'id': trip.id}) }}">
+												<i class="bi bi-pencil"></i>
+											</a>
+											{{ include('trip/_delete_form.html.twig') }}
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="8" class="text-center">No records found</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	{# Pagination Controls #}
+	<div class="pagination">
+		{{ knp_pagination_render(pagination) }}
+	</div>
+
 {% endblock %}
