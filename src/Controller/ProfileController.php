@@ -8,6 +8,7 @@ use App\Repository\BaseRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\TripRepository;
 use App\Service\PasswordManager;
+use App\Service\ProfileLoaderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -266,78 +267,82 @@ final class ProfileController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/charger', name: 'app_profile_upload', methods: ['POST'])]
-    public function uploadParticipants(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, BaseRepository $baseRepository): Response
+    public function uploadParticipants(Request $request, EntityManagerInterface $entityManager, BaseRepository $baseRepository, ProfileLoaderService $profileLoaderService): Response
     {
 
         $file = $request->files->get('file');
 
-        if ($file) {
+        if (!$file) {
+            $this->addFlash("danger", "Veuillez charger un fichier !");
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
 
-            if ($file->getClientOriginalExtension() !== 'csv') {
-                $this->addFlash("danger", "Le fichier doit être au format .csv.");
+        if ($file->getClientOriginalExtension() !== 'csv') {
+            $this->addFlash("danger", "Le fichier doit être au format .csv.");
+            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $fileName = $profileLoaderService->changeFileName($file);
+
+        try {
+            $file->move(
+                $this->getParameter('csv_directory'),
+                $fileName
+            );
+        } catch (FileException $e) {
+            throw new FileException("Erreur lors du téléchargement du fichier.");
+        }
+
+        $filePath = $this->getParameter('csv_directory') . '/' . $fileName;
+
+        $lines = $profileLoaderService->loadData($filePath);
+
+        foreach ($lines as $line) {
+
+            $username = $line[0];
+            $firstname = $line[1];
+            $lastname = $line[2];
+            $phoneNumber = $line[3];
+            $mail = $line[4];
+            $password = $line[5];
+
+            $base = $baseRepository->findOneBy(['name' => $line[6]]);
+
+            if (!$base) {
+                $this->addFlash("danger", "Le site $line[6] n'existe pas.");
                 return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
             }
 
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+            // Vérifier si l'utilisateur existe déjà dans la base de données
+            $existingParticipant = $entityManager->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
 
-            try {
-                $file->move(
-                    $this->getParameter('csv_directory'),
-                    $newFilename
-                );
-            } catch (FileException $e) {
-                throw new FileException("Erreur lors du téléchargement du fichier.");
-            }
+            if (!$existingParticipant) {
+                // Créer un nouvel utilisateur
+                $participant = new Participant();
+                $participant->setUsername($username);
+                $participant->setMail($mail);
+                $participant->setFirstname($firstname);
+                $participant->setLastname($lastname);
+                $participant->setPassword(password_hash($password, PASSWORD_BCRYPT)); // Hash du mot de passe
+                $participant->setPhoneNumber($phoneNumber);
+                $participant->setBase($base);
+                $participant->setActive(true);
 
-            $filePath = $this->getParameter('csv_directory') . '/' . $newFilename;
+                $participant->setRoles(["ROLE_USER"]);
 
-            if (($handle = fopen($filePath, 'r')) !== false) {
-                while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-                    $username = $data[0];
-                    $firstname = $data[1];
-                    $lastname = $data[2];
-                    $phoneNumber = $data[3];
-                    $mail = $data[4];
-                    $password = $data[5];
-
-                    $base = $baseRepository->findOneBy(['name' => $data[6]]);
-
-                    // Vérifier si l'utilisateur existe déjà dans la base de données
-                    $existingParticipant = $entityManager->getRepository(Participant::class)->findOneBy(['mail' => $mail]);
-
-                    if (!$existingParticipant) {
-                        // Créer un nouvel utilisateur
-                        $participant = new Participant();
-                        $participant->setUsername($username);
-                        $participant->setMail($mail);
-                        $participant->setFirstname($firstname);
-                        $participant->setLastname($lastname);
-                        $participant->setPassword(password_hash($password, PASSWORD_BCRYPT)); // Hash du mot de passe
-                        $participant->setPhoneNumber($phoneNumber);
-                        $participant->setBase($base);
-                        $participant->setActive(true);
-
-                        $participant->setRoles(["ROLE_USER"]);
-
-                        // Persister les données dans la base de données
-                        $entityManager->persist($participant);
-                    }
-                }
-                fclose($handle);
-                $entityManager->flush();
-
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-                $this->addFlash("success", "Les utilisateurs ont bien été chargés!");
-                return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+                // Persister les données dans la base de données
+                $entityManager->persist($participant);
             }
         }
-        return $this->render('profile/upload.html.twig', [
-        ]);
+
+//        fclose($handle);
+        $entityManager->flush();
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        $this->addFlash("success", "Les utilisateurs ont bien été chargés!");
+        return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
 
     }    
 
