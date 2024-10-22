@@ -211,7 +211,7 @@ final class TripController extends AbstractController
     {
         $referer = $request->headers->get('referer');
 
-        if($this->getUser()!=$trip->getOrganiser() && !$this->isGranted("ROLE_MODERATOR") ){
+        if($this->getUser()!=$trip->getOrganiser() && !$this->isGranted("ROLE_ADMIN") ){
             $this->addFlash("danger", "Vous ne pouvez pas supprimer cette sortie, vous n'en êtes pas l'auteur!");
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
