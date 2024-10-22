@@ -15,10 +15,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[Route('/lieu')]
 class LocationController extends AbstractController
 {
-    
+
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/get-location/{id}', name: 'app_get_location', methods: ['GET'])]
     public function getLocation(Location $location): JsonResponse
     {
@@ -33,7 +36,8 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[Route('/lieu', name: 'app_location_index', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/', name: 'app_location_index', methods: ['GET'])]
     public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator): Response
     {
       
@@ -56,9 +60,9 @@ class LocationController extends AbstractController
             'pagination' => $pagination,
         ]);
     }
-   
 
-    #[Route('lieu/ajouter', name: 'app_location_new', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/ajouter', name: 'app_location_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, CityLoaderService $cityLoaderService): Response
     {
         $location = new Location();
@@ -92,11 +96,6 @@ class LocationController extends AbstractController
             ])
             ->getForm();
 
-//        $formLocation = $this->createForm(LocationType::class, $location, ['is_admin' => false]);
-//        $formCity =     $this->createForm(CityType::class, $city);
-
-//        $formLocation->handleRequest($request);
-//        $formCity->handleRequest($request);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -129,16 +128,17 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[Route('lieu/{id}', name: 'app_location_show', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/{id}', name: 'app_location_show', methods: ['GET'])]
     public function show(Location $location): Response
     {
         return $this->render('location/show.html.twig', [
             'location' => $location,
         ]);
     }
-   
 
-    #[Route('lieu/{id}/modifier', name: 'app_location_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/{id}/modifier', name: 'app_location_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LocationType::class, $location);
@@ -156,7 +156,8 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[Route('lieu/{id}', name: 'app_location_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{id}/supprimer', name: 'app_location_delete', methods: ['POST'])]
     public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$location->getId(), $request->getPayload()->getString('_token'))) {

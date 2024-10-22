@@ -13,10 +13,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/groupe')]
 class GroupController extends AbstractController
 {
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/', name: 'app_group_index', methods: ['GET'])]
     public function index(GroupRepository $groupRepository, PaginatorInterface $paginator, Request $request): Response
     {
@@ -31,7 +34,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/ajouter', name: 'app_group_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
     {
@@ -67,12 +70,12 @@ class GroupController extends AbstractController
         ]);
     }
 
-    
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}', name: 'app_group_show', methods: ['GET'])]
     public function show(Group $group): Response
     {
         if ($group->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('You do not have permission to view this group.');
+            throw new ExceptionAccessDeniedException();
         }
 
         return $this->render('group/show.html.twig', [
