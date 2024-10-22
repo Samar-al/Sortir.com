@@ -12,10 +12,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -31,15 +29,10 @@ final class ProfileController extends AbstractController
        
     }
 
+    #[IsGranted("ROLE_ADMIN")]
     #[Route(name: 'app_profile_index', methods: ['GET'])]
     public function index(Request $request, ParticipantRepository $participantRepository, PaginatorInterface $paginator): Response
     {
-        
-        if (!$this->isGranted("ROLE_ADMIN"))
-        {
-            $this->addFlash('danger', 'Vous n\'avez pas les droits suffisant pour aller à cette page!');
-            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
-        }
 
         // Get the current page number (default is 1)
         $page = $request->query->getInt('page', 1);
@@ -70,9 +63,9 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-
+    #[IsGranted("ROLE_ADMIN")]
     #[Route('/ajouter', name: 'app_profile_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $profile = new Participant();
         $formProfile = $this->createForm(ParticipantType::class, $profile);
@@ -80,12 +73,6 @@ final class ProfileController extends AbstractController
 
         // Variable to hold the filename
         $newFilename = null;
-
-        if (!$this->isGranted("ROLE_ADMIN"))
-        {
-            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à créer des participants');
-            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
-        }
 
         if ($formProfile->isSubmitted() && $formProfile->isValid()) {
 
@@ -134,12 +121,12 @@ final class ProfileController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}', name: 'app_profile_show', methods: ['GET'])]
     public function show(Participant $profile): Response
     {
         if (!$this->isGranted("ROLE_ADMIN") && $profile->getMail() == 'anonym@anonym.com') {
-            $this->addFlash("danger", "Vous n'avez pas les droits suffisants!");
-            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+            throw new ExceptionAccessDeniedException();
         }
 
         $profilePicturesDir = $this->getParameter('profile_pictures_directory');
@@ -162,16 +149,16 @@ final class ProfileController extends AbstractController
     }
 
   
-    #[Route('/modifier/{id}', name: 'app_profile_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/modifier', name: 'app_profile_edit', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function edit(Request $request, Participant $profile, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function edit(Request $request, Participant $profile, EntityManagerInterface $entityManager): Response
     {     
         /** @var Participant $user */
         $user = $this->getUser();
         // Check if the user is either the owner of the profile or has ROLE_ADMIN
         if ($user !== $profile && !$this->isGranted('ROLE_ADMIN')) {
             // If not, deny access
-            throw new ExceptionAccessDeniedException('Vous n\'avez pas le droit de modifier ce profil!');
+            throw new ExceptionAccessDeniedException();
         }
         $formProfileEdit = $this->createForm(ParticipantType::class, $profile, ['is_edit' => true]);
         $formProfileEdit->handleRequest($request);
@@ -235,9 +222,8 @@ final class ProfileController extends AbstractController
             'profilePicture' => $newFilename,
         ]);
     }
-    
-    #[IsGranted('ROLE_ADMIN')]
-    #[Route('/supprimer/{id}', name: 'app_profile_delete', methods: ['POST'])]
+
+    #[Route('/{id}/supprimer', name: 'app_profile_delete', methods: ['POST'])]
     public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager,
                            TripRepository $tripRepository, ParticipantRepository $participantRepository): Response
     {
@@ -251,8 +237,7 @@ final class ProfileController extends AbstractController
 
        // Check if the user is either ROLE_ADMIN or the owner of the account
         if (!$this->isGranted('ROLE_ADMIN') && $loggedInUser->getId() !== $participant->getId()) {
-            $this->addFlash("danger", "Vous n'avez pas les droits suffisants pour supprimer cet utilisateur !");
-            return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
+            throw new ExceptionAccessDeniedException();
         }
 
         if (!$this->isCsrfTokenValid('delete'.$participant->getId(), $request->getPayload()->getString('_token'))) {
@@ -279,6 +264,7 @@ final class ProfileController extends AbstractController
 
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/charger', name: 'app_profile_upload', methods: ['POST'])]
     public function uploadParticipants(Request $request, SluggerInterface $slugger, EntityManagerInterface $entityManager, BaseRepository $baseRepository): Response
     {
@@ -346,7 +332,7 @@ final class ProfileController extends AbstractController
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
-
+                $this->addFlash("success", "Les utilisateurs ont bien été chargés!");
                 return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
             }
         }
@@ -355,7 +341,7 @@ final class ProfileController extends AbstractController
 
     }    
 
-
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/participant-action', name: 'app_profile_deactivate', methods: ['POST'])]
     public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
     {

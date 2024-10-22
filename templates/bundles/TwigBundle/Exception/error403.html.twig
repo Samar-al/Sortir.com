@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Access denied - 403 Error{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{asset('css/error403-page-style.css')}}">
+{% endblock %}
+
+{% block body %}
+
+    <h1>Access denied!</h1>
+    <h2>Error 403</h2>
+    <div id="jail">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             xmlns:xhtml="http://www.w3.org/1999/xhtml"
+             xmlns:xlink="http://www.w3.org/1999/xlink"
+             version="1.1"
+             viewBox="0 0 1000 1000"
+             preserveAspectRatio="xMinYMin"
+             id="spinner"
+        >
+
+            <defs>
+                <path id="textPath" d="M 250 500 A 250,250 0 1 1 250 500.0001"/>
+            </defs>
+            <text x="0" y="0" text-anchor="left" style="font-size:90pt;"><textPath xlink:href="#textPath" startOffset="0%" >MOUSE JAIL</textPath><textPath xlink:href="#textPath" startOffset="50%" >MOUSE JAIL</textPath></text>
+        </svg>
+        <div id="cursor"></div>
+    </div>
+
+{#    <div class="text-center mt-5">#}
+{#        <a class="btn btn-primary" href="/">Go to home</a>#}
+{#    </div>#}
+
+    {% block javascripts %}
+        <script>
+            var jail = document.getElementById('jail');
+
+            document.addEventListener('mousemove', mouseUpdate, false);
+            document.addEventListener('mouseenter', mouseUpdate, false);
+
+            var seenMouse = false;
+
+            function mouseUpdate(e) {
+                var jailCoords = jail.getBoundingClientRect();
+                var pageCoords = document.body.getBoundingClientRect();
+
+                var x = e.pageX - jailCoords.left;
+                var y = e.pageY - jailCoords.top;
+
+                document.body.style.setProperty('--mouseX', x);
+                document.body.style.setProperty('--mouseY', y);
+
+                document.body.style.setProperty('--width', pageCoords.width);
+                document.body.style.setProperty('--height', pageCoords.height);
+
+                if (!seenMouse) {
+                    document.body.classList.add('seenMouse');
+                    seenMouse = true;
+                }
+            }
+
+            function mouseLeft(e) {
+                document.body.classList.remove('seenMouse');
+                seenMouse = false;
+            }
+
+            document.addEventListener('mouseleave', mouseLeft, false);
+        </script>
+    {% endblock %}
+{% endblock %}
