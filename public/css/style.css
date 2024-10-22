@@ -62,9 +62,20 @@
         text-align: center;
         margin: 0;
     }
+    .homesquare {
+        flex-direction: column !important;
+    }
 }
 
 .pagination {
     width: 65%;
     margin: 0 auto;
+}
+
+.profilePicHome img {
+    border-radius: 50%;
+    height: 80px;
+    width: 80px; /* Ensure the width matches the height for a circular crop */
+    object-fit: cover; /* Ensures the image fills the box while maintaining its aspect ratio */
+    object-position: center; /
 }

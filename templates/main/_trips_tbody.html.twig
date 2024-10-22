@@ -4,7 +4,23 @@
 		<td>{{ trip.dateHourStart|date('d/m/Y H:i') }}</td>
 		<td>{{ trip.dateRegistrationLimit|date('d/m/Y H:i') }}</td>
 		<td>{{ trip.participants|length }}/{{ trip.numMaxRegistration }}</td>
-		<td>{{ trip.state.label }}</td>
+		<td>
+			{% if trip.state.label == 'created' %}
+				<span class="badge bg-warning">Créée</span>
+			{% elseif trip.state.label == 'open' %}
+				<span class="badge bg-success">Ouvert</span>
+			{% elseif trip.state.label == 'closed' %}
+				<span class="badge bg-danger">Fermé</span>
+			{% elseif trip.state.label == 'in progress' %}
+				<span class="badge bg-info">En cours</span>
+			{% elseif trip.state.label == 'passed' %}
+				<span class="badge bg-secondary">Terminé</span>
+			{% elseif trip.state.label == 'cancelled' %}
+				<span class="badge bg-dark">Annulé</span>
+			{% else %}
+				<span class="badge bg-light">{{ trip.state.label }}</span>
+			{% endif %}
+		</td>
 		<td>
 			{% if app.user in trip.participants %}
 				X

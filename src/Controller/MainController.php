@@ -56,6 +56,23 @@ class MainController extends AbstractController
 
             return $this->json(['html' => $html]);
         }
+
+        // Check if the user has a profile picture
+        $user = $this->getUser();
+        $userId = $user->getId();
+        $profilePicturesDir = $this->getParameter('profile_pictures_directory');
+        $pictureFilename = 'profilepic' . $userId;
+        
+        // Check if the file exists in the directory
+        $fullPathJpg = $profilePicturesDir . '/' . $pictureFilename . '.jpg';
+        $fullPathPng = $profilePicturesDir . '/' . $pictureFilename . '.png';
+        $userProfilePicture = null;
+
+        if (file_exists($fullPathJpg)) {
+            $userProfilePicture = $pictureFilename . '.jpg';
+        } elseif (file_exists($fullPathPng)) {
+            $userProfilePicture = $pictureFilename . '.png';
+        }
     
         return $this->render('main/index.html.twig', [
             'pagination' => $paginator->paginate(
@@ -64,6 +81,7 @@ class MainController extends AbstractController
                 10 // Limit the number of entries per page
             ),
             'bases' => $baseRepository->findAll(),  // Assuming bases are available via a repository method
+            'profilePicture' => $userProfilePicture
         ]);
     }
 }
