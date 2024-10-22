@@ -15,14 +15,25 @@
 	{% endif %}
 	{% if is_granted ('IS_AUTHENTICATED_FULLY') %}
 		<div class="container-fluid d-flex justify-content-end">
-			<div class="col-3 p-3 homesquare shadow rounded bg-white my-4">
-				<p>
-					<strong>Participant</strong>:
-					{{app.user}}</p>
-				<p>
-					<strong>Date du jour</strong>:
-					{{ "now" | date('d/m/Y') }}</p>
+			<div class="d-flex justify-content-around col-3 p-3 homesquare shadow rounded bg-white my-4 flex-lg-row flex-column">
+				<div>
+					<p>
+						<strong>Participant</strong>:
+						{{app.user}}</p>
+					<p>
+						<strong>Date du jour</strong>:
+						{{ "now" | date('d/m/Y') }}</p>
+				</div>
+				<div class='profilePicHome text-center'>
+					{% if profilePicture %}
+						<img src="{{ asset('uploads/profile_pictures/' ~ profilePicture) }}" alt="Profile picture" class="img-fluid" class="img-fluid my-5" style="width: 80px;">
+					{% else %}
+						<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp" alt="Avatar" class="img-fluid my-5" style="width: 80px;"/>
+					{% endif %}
+				</div>
 			</div>
+
+
 		</div>
 	{% endif %}
 	<div class="row">
