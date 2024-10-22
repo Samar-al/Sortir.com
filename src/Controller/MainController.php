@@ -55,7 +55,7 @@ class MainController extends AbstractController
             return $this->json(['html' => $html]);
         }
 
-        // Check if the user has a profile picture
+        /** @var Participant $user */
         $user = $this->getUser();
         $userId = $user->getId();
         $profilePicturesDir = $this->getParameter('profile_pictures_directory');

@@ -16,16 +16,20 @@ use Faker;
 class AppFixtures extends Fixture
 {
     private $passwordHasher;
-
+     /**
+     * @param \Doctrine\Persistence\ObjectManager $manager
+     */
     public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
         $this->passwordHasher = $passwordHasher;
 
     }
 
+
     public function load(ObjectManager $manager): void
     {
         $faker = Faker\Factory::create("fr_FR");
+       
         $populator = new \Faker\ORM\Doctrine\Populator($faker, $manager);
 
         // Create and persist City entities

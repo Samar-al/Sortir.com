@@ -79,3 +79,11 @@
     object-fit: cover; /* Ensures the image fills the box while maintaining its aspect ratio */
     object-position: center; /
 }
+body {
+    overflow-x: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Enable horizontal scroll for tables if needed */
+}
