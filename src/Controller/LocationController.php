@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\City;
 use App\Entity\Location;
+use App\Form\CityType;
 use App\Form\LocationType;
 use App\Repository\LocationRepository;
+use App\Service\CityLoaderService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +34,7 @@ class LocationController extends AbstractController
     }
 
     #[Route('/lieu', name: 'app_location_index', methods: ['GET'])]
-    public function index(Request $request, LocationRepository $locationRepository): Response
+    public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator): Response
     {
       
         $query = $request->query->get('q', '');
@@ -42,29 +46,86 @@ class LocationController extends AbstractController
             // Retrieve all locations if no search query is present
             $locations = $locationRepository->findAll();
         }
+         // Paginate the results
+        $pagination = $paginator->paginate(
+            $locations, // The query or query builder to paginate
+            $request->query->getInt('page', 1), // Current page number, defaults to 1
+            10 // Limit the number of entries per page to 10
+        );
         return $this->render('location/index.html.twig', [
-            'locations' => $locations,
+            'pagination' => $pagination,
         ]);
     }
    
 
     #[Route('lieu/ajouter', name: 'app_location_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, CityLoaderService $cityLoaderService): Response
     {
         $location = new Location();
-        $form = $this->createForm(LocationType::class, $location);
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $form = $this->createForm(LocationType::class, $location, ['is_admin' => true]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $entityManager->persist($location);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
+            }
+
+            return $this->render('location/new.html.twig', [
+                'location' => $location,
+                'form' => $form,
+            ]);
+
+        }
+
+        $city = new City();
+
+        $departments = $cityLoaderService->loadDepartments();
+
+        $form = $this->createFormBuilder()
+            ->add('location', LocationType::class, ['data' => $location, 'is_admin' => false])
+            ->add('city', CityType::class, [
+                'data' => $city,
+            ])
+            ->getForm();
+
+//        $formLocation = $this->createForm(LocationType::class, $location, ['is_admin' => false]);
+//        $formCity =     $this->createForm(CityType::class, $city);
+
+//        $formLocation->handleRequest($request);
+//        $formCity->handleRequest($request);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $city = $form->get('city')->getData();
+
+            if ($city == null || empty($city->getZipCode())) {
+                $this->addFlash('danger', 'Vous devez sélectionner une ville !');
+                return $this->redirectToRoute('app_location_new', [], Response::HTTP_SEE_OTHER);
+            }
+
+            $entityManager->persist($city);
+            $entityManager->flush();
+
+            $location->setCity($city);
+
             $entityManager->persist($location);
             $entityManager->flush();
 
+            $this->addFlash("success", "Vous avez ajouté un lieu avec succès !");
             return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
+
         }
 
         return $this->render('location/new.html.twig', [
+            'departments' => $departments,
             'location' => $location,
-            'form' => $form,
+            'form' => $form->createView(),
+
         ]);
     }
 

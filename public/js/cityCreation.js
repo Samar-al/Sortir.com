@@ -3,13 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let departmentSelect = document.getElementById('city_department'); // Change this ID to match your form field
     let citySelect = document.getElementById('cityName'); // Change this ID to match your city field
 
-    let cityHiddenNode = document.getElementById('city_name'); // Change this ID to match your city field
-    let zipCodeNode = document.getElementById('city_ZipCode'); // Change this ID to match your city field
+    // let cityHiddenNode = document.getElementById('city_name'); // Change this ID to match your city field
+    // let zipCodeNode = document.getElementById('city_ZipCode'); // Change this ID to match your city field
+    let cityHiddenNode = document.querySelector('[data-custom="city_name"]') // Change this ID to match your city field
+    let zipCodeNode = document.querySelector('[data-custom="city_ZipCode"]'); // Change this ID to match your city field
 
     departmentSelect.addEventListener('change', function() {
         let departmentCode = departmentSelect.value;
 
-        fetch(`/city/get-cities/${departmentCode}`)
+        fetch(`/ville/get-cities/${departmentCode}`)
         .then(response => response.json())
         .then(data => {
                 citySelect.innerHTML = '';

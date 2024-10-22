@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Groupe - création
+{% endblock %}
+
+{% block body %}
+	{% include "fragments/_nav.html.twig" %}
+	<h1 class="text-center">Créer une nouveau groupe</h1>
+	<div class="row">
+		<div class="col-6 offset-3">
+			{% include "fragments/_flash_message.html.twig" %}
+		</div>
+	</div>
+	{% include "group/_form.html.twig" %}
+
+{% endblock %}
+{% block javascripts %}
+	<script src="{{asset('js/selectedMembers.js')}}"></script>
+{% endblock %}

@@ -80,12 +80,26 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, unique: true)]
     private ?string $username = null;
 
+    /**
+     * @var Collection<int, Group>
+     */
+    #[ORM\OneToMany(targetEntity: Group::class, mappedBy: 'owner')]
+    private Collection $privateGroups;
+
+    /**
+     * @var Collection<int, Group>
+     */
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'members')]
+    private Collection $members;
+
     public function __construct()
     {
         $this->isAdmin  = false;
         $this->isActive  = true;
         $this->trips = new ArrayCollection();
         $this->organisedTrips = new ArrayCollection();
+        $this->privateGroups = new ArrayCollection();
+        $this->members = new ArrayCollection();
     }
     public function __toString(): string
     {
@@ -308,6 +322,63 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getPrivateGroups(): Collection
+    {
+        return $this->privateGroups;
+    }
+
+    public function addPrivateGroup(Group $privateGroup): static
+    {
+        if (!$this->privateGroups->contains($privateGroup)) {
+            $this->privateGroups->add($privateGroup);
+            $privateGroup->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrivateGroup(Group $privateGroup): static
+    {
+        if ($this->privateGroups->removeElement($privateGroup)) {
+            // set the owning side to null (unless already changed)
+            if ($privateGroup->getOwner() === $this) {
+                $privateGroup->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getMembers(): Collection
+    {
+        return $this->members;
+    }
+
+    public function addMember(Group $member): static
+    {
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->addMember($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMember(Group $member): static
+    {
+        if ($this->members->removeElement($member)) {
+            $member->removeMember($this);
+        }
 
         return $this;
     }

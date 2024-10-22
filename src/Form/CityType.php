@@ -18,13 +18,16 @@ class CityType extends AbstractType
         $builder
             ->add('name', HiddenType::class, [
                 'label' => 'Ville',
-
+                'attr' => [
+                    'data-custom' => 'city_name',
+                ]
             ])
             ->add('ZipCode', TextType::class, [
                 'label' => 'Code postal',
                 'required' => false,
                 'attr' => [
                     'readonly' => true,
+                    'data-custom' => 'city_ZipCode',
                 ]
             ])
         ;

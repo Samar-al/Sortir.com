@@ -22,23 +22,6 @@
             <div class="row m-3 col-3"></div>
 
             <div>
-                <label for="city_department" class="form-label mt-4">Département</label>
-                <select class="form-select" id="city_department" name="city_department">
-                    <option value="" disabled selected>Sélectionner un département</option>
-                    {% for department in departments %}
-                        <option value="{{ department.code }}">{{ department.nom }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label for="cityName" class="form-label mt-4">Ville</label>
-                <select class="form-select" id="cityName" name="cityName">
-                    <option value="" disabled selected>Sélectionner une ville</option>
-                </select>
-            </div>
-
-            <div>
                 {{ include('city/_form.html.twig') }}
             </div>
 

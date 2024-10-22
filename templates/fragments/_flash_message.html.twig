@@ -1,7 +1,4 @@
 
-{# Lien vers la doc : https://symfony.com/doc/5.4/session.html#flash-messages #}
-{# label correspond au premier argument fournis à addflashes #}
-{# messages correspond à notre tableau de message lié au label #}
 {% for label, messages in app.flashes %}
     {# on boucle une deuxieme pour afficher les messages vu que c'est des tableaux #}
     {% for message in messages %}

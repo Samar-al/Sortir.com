@@ -13,6 +13,7 @@ use App\Event\TripRegistrationEvent;
 use App\Repository\StateRepository;
 use App\Repository\TripRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +27,7 @@ final class TripController extends AbstractController
 
 
     #[Route('/', name: 'app_trip_index', methods: ['GET'])]
-    public function index(Request $request,TripRepository $tripRepository): Response
+    public function index(Request $request,TripRepository $tripRepository, PaginatorInterface $paginator): Response
     {
         $search = $request->query->get('search');
 
@@ -37,9 +38,15 @@ final class TripController extends AbstractController
             // If no search query, return all trips
             $trips = $tripRepository->findAll();
         }
+        // Paginate the results (trips can be an array)
+        $pagination = $paginator->paginate(
+            $trips, // The array or query to paginate
+            $request->query->getInt('page', 1), // Current page number
+            10 // Limit the number of entries per page to 10
+        );
 
         return $this->render('trip/index.html.twig', [
-            'trips' => $trips,
+            'pagination' => $pagination,
         ]);
     }
 
@@ -124,6 +131,11 @@ final class TripController extends AbstractController
     #[Route('/modifier/{id}', name: 'app_trip_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
+        // Block edition if the trip state is not 'created'
+        if ($trip->getState()->getLabel() !== 'created') {
+            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie car elle n\'est plus à l\'état "créée".');
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
         // Check if the user is the organizer of the trip
         if ($this->getUser() !== $trip->getOrganiser()) {
             $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie, vous n\'en êtes pas l\'auteur!');
@@ -187,16 +199,17 @@ final class TripController extends AbstractController
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
-    return $this->render('trip/edit.html.twig', [
-        'trip' => $trip,
-        'cities' => $cities,
-        'formTrip' => $formTrip->createView(),
-    ]);
-}
+        return $this->render('trip/edit.html.twig', [
+            'trip' => $trip,
+            'cities' => $cities,
+            'formTrip' => $formTrip->createView(),
+        ]);
+    }
 
     #[Route('/supprimer/{id}', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
     {
+        $referer = $request->headers->get('referer');
 
         if($this->getUser()!=$trip->getOrganiser() && !$this->isGranted("ROLE_MODERATOR") ){
             $this->addFlash("danger", "Vous ne pouvez pas supprimer cette sortie, vous n'en êtes pas l'auteur!");
@@ -211,7 +224,12 @@ final class TripController extends AbstractController
         $entityManager->remove($trip);
         $entityManager->flush();
         $this->addFlash("success", "Vous avez supprimé une sortie avec succès !");
-        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+
+        if (!$referer) {
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        }
+         // Redirect back to the referer
+        return $this->redirect($referer);
 
     }
 
