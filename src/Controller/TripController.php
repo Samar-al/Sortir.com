@@ -2,9 +2,6 @@
 
 namespace App\Controller;
 
-
-use App\Entity\City;
-use App\Entity\Location;
 use App\Entity\Trip;
 use App\Event\TripUnregistrationEvent;
 use App\Form\TripType;
@@ -19,6 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/sortie')]
@@ -128,7 +126,7 @@ final class TripController extends AbstractController
         ]);
     }
 
-    #[Route('/modifier/{id}', name: 'app_trip_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/modifier', name: 'app_trip_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
         // Block edition if the trip state is not 'created'
@@ -138,8 +136,7 @@ final class TripController extends AbstractController
         }
         // Check if the user is the organizer of the trip
         if ($this->getUser() !== $trip->getOrganiser()) {
-            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie, vous n\'en êtes pas l\'auteur!');
-            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+            throw new ExceptionAccessDeniedException();
         }
 
         $formTrip = $this->createForm(TripType::class, $trip);
@@ -206,7 +203,7 @@ final class TripController extends AbstractController
         ]);
     }
 
-    #[Route('/supprimer/{id}', name: 'app_trip_delete', methods: ['POST'])]
+    #[Route('/{id}/supprimer', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
     {
         $referer = $request->headers->get('referer');

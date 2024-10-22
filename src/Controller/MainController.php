@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Trip;
-use App\Form\TripSearchType;
 use App\Repository\BaseRepository;
 use App\Repository\TripRepository;
 use Knp\Component\Pager\PaginatorInterface;

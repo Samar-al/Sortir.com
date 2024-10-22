@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Fetch initial location data when the page loads
     if (locationSelect.value) {
         const locationId = locationSelect.value;
-        fetch(`/get-location/${locationId}`)
+        fetch(`/lieu/get-location/${locationId}`)
             .then(response => response.json())
             .then(data => {
                 
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (locationId) {
             // Make AJAX request to get location data
-            fetch(`/get-location/${locationId}`)
+            fetch(`/lieu/get-location/${locationId}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
