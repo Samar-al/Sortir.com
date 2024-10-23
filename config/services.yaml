@@ -6,6 +6,7 @@
 parameters:
   profile_pictures_directory: "%kernel.project_dir%/public/uploads/profile_pictures"
   csv_directory: "%kernel.project_dir%/public/uploads/csv"
+  app.adminMail: "%env(string:ADMIN_MAIL)%"
 services:
   # default configuration for services in *this* file
   _defaults:
@@ -24,6 +25,9 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     # PasswordManager service should be autowired without any manual binding
+  App\Service\SendEmailService:
+    arguments:
+      $adminMail: "%app.adminMail%"
   App\EventListener\TripListener:
     tags:
       - name: kernel.event_listener
