@@ -126,6 +126,7 @@ final class TripController extends AbstractController
         ]);
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/modifier', name: 'app_trip_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
     {
@@ -135,7 +136,7 @@ final class TripController extends AbstractController
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
         // Check if the user is the organizer of the trip
-        if ($this->getUser() !== $trip->getOrganiser()) {
+        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $trip->getOrganiser()) {
             throw new ExceptionAccessDeniedException();
         }
 
@@ -203,6 +204,7 @@ final class TripController extends AbstractController
         ]);
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/supprimer', name: 'app_trip_delete', methods: ['POST'])]
     public function delete(Request $request, Trip $trip, EntityManagerInterface $entityManager): Response
     {
@@ -222,7 +224,7 @@ final class TripController extends AbstractController
         $entityManager->flush();
         $this->addFlash("success", "Vous avez supprimé une sortie avec succès !");
 
-        if (!$referer) {
+        if (!$referer || str_contains($referer, `sortie/\d+`) ) {
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
          // Redirect back to the referer
@@ -230,8 +232,8 @@ final class TripController extends AbstractController
 
     }
 
-   
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/inscription', name: 'app_trip_register', methods: ['POST'])]
     public function registerToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
     {
@@ -271,7 +273,8 @@ final class TripController extends AbstractController
         return $this->redirectToRoute('app_main_index');
     }
 
-    #[Route('/{id}/desisstement', name: 'app_trip_unregister', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/{id}/desistement', name: 'app_trip_unregister', methods: ['POST'])]
     public function unregisterToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
     {
         $user = $this->getUser();
@@ -299,6 +302,7 @@ final class TripController extends AbstractController
 
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/publier', name: 'app_trip_publish', methods: ['GET'])]
     public function publishTrip(Trip $trip, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
     {
@@ -335,6 +339,7 @@ final class TripController extends AbstractController
 
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/annuler', name: 'app_trip_cancel', methods: ['GET', 'POST'])]
     public function cancelTrip(Trip $trip, Request $request, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
     {

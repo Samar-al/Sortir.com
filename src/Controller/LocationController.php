@@ -36,7 +36,7 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/', name: 'app_location_index', methods: ['GET'])]
     public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator): Response
     {
@@ -128,7 +128,7 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/{id}', name: 'app_location_show', methods: ['GET'])]
     public function show(Location $location): Response
     {
@@ -137,11 +137,11 @@ class LocationController extends AbstractController
         ]);
     }
 
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/{id}/modifier', name: 'app_location_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(LocationType::class, $location);
+        $form = $this->createForm(LocationType::class, $location, ['is_admin' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
