@@ -7,6 +7,7 @@ use App\Entity\Location;
 use App\Form\CityType;
 use App\Form\LocationType;
 use App\Repository\LocationRepository;
+use App\Repository\TripRepository;
 use App\Service\CityLoaderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -38,7 +39,7 @@ class LocationController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/', name: 'app_location_index', methods: ['GET'])]
-    public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator): Response
+    public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator, TripRepository $tripRepository): Response
     {
       
         $query = $request->query->get('q', '');
@@ -50,6 +51,15 @@ class LocationController extends AbstractController
             // Retrieve all locations if no search query is present
             $locations = $locationRepository->findAll();
         }
+
+        $locationsWithTrips = [];
+
+        foreach ($locations as $location)
+        {
+            $hasTrip = $tripRepository->count(['location' => $location]) > 0;
+            $locationsWithTrips[$location->getId()] = $hasTrip;
+        }
+
          // Paginate the results
         $pagination = $paginator->paginate(
             $locations, // The query or query builder to paginate
@@ -58,6 +68,7 @@ class LocationController extends AbstractController
         );
         return $this->render('location/index.html.twig', [
             'pagination' => $pagination,
+            'locationsWithTrips' => $locationsWithTrips
         ]);
     }
 
@@ -130,10 +141,13 @@ class LocationController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/{id}', name: 'app_location_show', methods: ['GET'])]
-    public function show(Location $location): Response
+    public function show(Location $location, TripRepository $tripRepository): Response
     {
+        $hasTrip = $tripRepository->count(['location' => $location]) > 0;
+
         return $this->render('location/show.html.twig', [
             'location' => $location,
+            'hasTrip' => $hasTrip,
         ]);
     }
 

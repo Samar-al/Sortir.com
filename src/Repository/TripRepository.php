@@ -101,7 +101,6 @@ class TripRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
     //    /**
     //     * @return Trip[] Returns an array of Trip objects
     //     */
