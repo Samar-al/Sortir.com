@@ -41,10 +41,28 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
-#        - { path: ^/profil, roles: ROLE_ADMIN }
-#
-#    role_hierarchy:
-#        ROLE_ADMIN: ROLE_USER
+
+        # ROLE_USER
+            #MAIN
+#        - { path: ^/, roles: ROLE_USER }
+            #PROFIL
+        - { path: ^/profil/\d+(?:/modifier)?, roles: ROLE_USER }
+        - { path: ^/ville/get-cities/\d+, roles: ROLE_USER }
+        - { path: ^/groupe/, roles: ROLE_USER }
+        - { path: ^/lieu/(?:get-location/\d+|\d+/ajouter), roles: ROLE_USER }
+        - { path: ^/sortie/\d+/(?:modifier|supprimer|inscription|desistement|annuler), roles: ROLE_USER }
+        - { path: ^/sortie/ajouter, roles: ROLE_USER }
+        - { path: ^/logout, roles: ROLE_USER }
+
+        # ROLE_ADMIN (inclut les droits de ROLE_USER à travers la hiérarchie)
+        - { path: ^/profil/\d+/(?:ajouter|supprimer), roles: ROLE_ADMIN }
+        - { path: ^/profil/(?:charger|participant-action|reactivate-participants)?, roles: ROLE_ADMIN }
+        - { path: ^/ville/(?:ajouter)?$, roles: ROLE_ADMIN }
+        - { path: ^/lieu/(?:\d+|modifier|\d+/supprimer), roles: ROLE_ADMIN }
+
+
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
 
 when@test:
     security:
