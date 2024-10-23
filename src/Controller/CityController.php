@@ -43,7 +43,7 @@ final class CityController extends AbstractController
         ]);
     }
 
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/ajouter', name: 'app_city_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, CityRepository $cityRepository, CityLoaderService $cityLoaderService): Response
     {

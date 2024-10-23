@@ -15,6 +15,10 @@ class MainController extends AbstractController
     #[Route('/', name: 'app_main_index', methods:["GET", "POST"])]
     public function index(TripRepository $tripRepository, BaseRepository $baseRepository, Request $request, PaginatorInterface $paginator): Response
     {
+        if (empty($this->getUser())) {
+            return $this->redirectToRoute('app_login');
+        }
+
         // Retrieve filter criteria
         $selectedBase = $request->request->get('selectBase');
         $searchNameTrip = $request->request->get('searchNameTrip');
