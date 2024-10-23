@@ -124,6 +124,33 @@ div.pagination .pagination {
     border-color: #007bff;
 }
 
+.site-name {
+    font-family: 'Roboto', sans-serif; /* Example custom font */
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase; /* Optional for styling */
+    letter-spacing: 1px; /* Optional for modern look */
+    padding-left: 10px; /* Space between logo and text */
+    background-color: #f8f9fa;
+    padding: 5px 10px;
+    border: 4px double;
+    border-radius: 5px;
+}
+
+.site-name:hover {
+    color: #0056b3; /* Hover effect */
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between logo and text */
+}
+.navbar-brand:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
 @media (max-width: 576px) {
     .pagination span a, .pagination span {
         padding: 5px 10px;
