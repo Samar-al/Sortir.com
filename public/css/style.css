@@ -52,9 +52,8 @@
 }
 
 .add-trip {
-    text-align: start;
-    margin-left: 19rem;
-    margin-bottom: 3rem;
+    text-align: center;
+    margin-top: 2rem;
     
 }
 @media screen and (max-width: 900px) {
@@ -67,10 +66,6 @@
     }
 }
 
-.pagination {
-    width: 65%;
-    margin: 0 auto;
-}
 
 .profilePicHome img {
     border-radius: 50%;
@@ -88,3 +83,62 @@ body {
     overflow-x: auto; /* Enable horizontal scroll for tables if needed */
 }
 
+div.pagination {
+    box-shadow: none; 
+}
+
+div.pagination .pagination {
+    box-shadow: 9px 14px 8px 0px rgba(0, 0, 0, 0.1); 
+}
+
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    width: 65%;
+    margin: 0 auto;
+}
+
+.pagination span {
+    margin: 0 5px;
+}
+
+.pagination span a, .pagination span {
+
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #007bff;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a:hover, .pagination span:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.pagination span.current {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+@media (max-width: 576px) {
+    .pagination span a, .pagination span {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pagination span {
+        display: none;
+    }
+
+    .pagination span:first-child,
+    .pagination span:last-child,
+    .pagination span.current {
+        display: block;
+    }
+}
