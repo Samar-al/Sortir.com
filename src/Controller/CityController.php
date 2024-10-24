@@ -23,7 +23,7 @@ final class CityController extends AbstractController
     #[Route(name: 'app_city_index', methods: ['GET'])]
     public function index(CityRepository $cityRepository, PaginatorInterface $paginator, Request $request): Response
     {
-    
+
         $search = $request->query->get('search');
         if ($search) {
             $cities = $cityRepository->searchByName($search);

@@ -20,7 +20,6 @@ class CityControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->client->loginUser($this->getUserAdmin());
         $this->cityRepository = $this->createMock(CityRepository::class);
-        $this->paginator = $this->createMock(PaginatorInterface::class);
     }
 
     // INDEX route testing

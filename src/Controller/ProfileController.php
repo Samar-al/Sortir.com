@@ -18,16 +18,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as ExceptionAccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/profil')]
 final class ProfileController extends AbstractController
 {
     private $passwordManager;
+
     public function __construct(PasswordManager $passwordManager)
     {
         $this->passwordManager = $passwordManager;
-       
+
     }
 
     #[IsGranted("ROLE_ADMIN")]
@@ -57,10 +57,10 @@ final class ProfileController extends AbstractController
             $limit              // Limit of participants per page
         );
 
-    
+
         return $this->render('profile/index.html.twig', [
             'pagination' => $pagination,
-          
+
         ]);
     }
 
@@ -110,8 +110,8 @@ final class ProfileController extends AbstractController
             }
 
             // Success flash message for file upload
-          $this->addFlash('success', 'Le profil a été créé avec succès !');
-          
+            $this->addFlash('success', 'Le profil a été créé avec succès !');
+
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -149,11 +149,11 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-  
+
     #[Route('/{id}/modifier', name: 'app_profile_edit', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function edit(Request $request, Participant $profile, EntityManagerInterface $entityManager): Response
-    {     
+    {
         /** @var Participant $user */
         $user = $this->getUser();
         // Check if the user is either the owner of the profile or has ROLE_ADMIN
@@ -208,12 +208,11 @@ final class ProfileController extends AbstractController
                 $hashedPassword = $this->passwordManager->hashPassword($profile, $plainPassword);
                 $profile->setPassword($hashedPassword);
             }
-           
 
 
             $entityManager->flush();
-            $this->addFlash("success","Profil mis à jour!");
-            return $this->redirectToRoute('app_profile_show', ["id"=>$idProfile], Response::HTTP_SEE_OTHER);
+            $this->addFlash("success", "Profil mis à jour!");
+            return $this->redirectToRoute('app_profile_show', ["id" => $idProfile], Response::HTTP_SEE_OTHER);
 
         }
 
@@ -225,23 +224,23 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/{id}/supprimer', name: 'app_profile_delete', methods: ['POST'])]
-    public function delete(Request $request, Participant $participant, EntityManagerInterface $entityManager,
+    public function delete(Request        $request, Participant $participant, EntityManagerInterface $entityManager,
                            TripRepository $tripRepository, ParticipantRepository $participantRepository): Response
     {
         /** @var Participant $loggedInUser */
         $loggedInUser = $this->getUser();
-         // Block deletion if the participant has the email anonym@anonym.com
+        // Block deletion if the participant has the email anonym@anonym.com
         if ($participant->getMail() === 'anonym@anonym.com') {
             $this->addFlash("danger", "Vous ne pouvez pas supprimer cet utilisateur.");
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
 
-       // Check if the user is either ROLE_ADMIN or the owner of the account
+        // Check if the user is either ROLE_ADMIN or the owner of the account
         if (!$this->isGranted('ROLE_ADMIN') && $loggedInUser->getId() !== $participant->getId()) {
             throw new ExceptionAccessDeniedException();
         }
 
-        if (!$this->isCsrfTokenValid('delete'.$participant->getId(), $request->getPayload()->getString('_token'))) {
+        if (!$this->isCsrfTokenValid('delete' . $participant->getId(), $request->getPayload()->getString('_token'))) {
             $this->addFlash("danger", "CSRF token n'est pas valide!");
             return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -344,13 +343,13 @@ final class ProfileController extends AbstractController
         $this->addFlash("success", "Les utilisateurs ont bien été chargés!");
         return $this->redirectToRoute('app_profile_index', [], Response::HTTP_SEE_OTHER);
 
-    }    
+    }
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/participant-action', name: 'app_profile_deactivate', methods: ['POST'])]
     public function deactivateParticipants(Request $request, EntityManagerInterface $entityManager, ParticipantRepository $participantRepository): Response
     {
-         // CSRF token validation for security
+        // CSRF token validation for security
         if (!$this->isCsrfTokenValid('participant_action', $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token.');
             return $this->redirectToRoute('app_profile_index');
@@ -358,7 +357,7 @@ final class ProfileController extends AbstractController
 
         // Get the selected participants from the form
         $selectedParticipants = $request->request->all('participants');
-       // dd($selectedParticipants);
+        // dd($selectedParticipants);
         if (empty($selectedParticipants)) {
             $this->addFlash('error', 'No participants selected for deactivation.');
             return $this->redirectToRoute('app_profile_index');
@@ -374,9 +373,9 @@ final class ProfileController extends AbstractController
             } elseif ($action === 'reactivate') {
                 $participant->setActive(true); // Reactivate the participant
             }
-           
+
             $entityManager->persist($participant);
-            
+
         }
 
         $entityManager->flush();
@@ -389,7 +388,7 @@ final class ProfileController extends AbstractController
         }
         // Redirect back to the profile index
         return $this->redirectToRoute('app_profile_index');
-    
+
 
     }
 }

@@ -23,9 +23,9 @@ class GroupController extends AbstractController
     #[Route('/', name: 'app_group_index', methods: ['GET'])]
     public function index(GroupRepository $groupRepository, PaginatorInterface $paginator, Request $request): Response
     {
-    
+
         $query = $groupRepository->findGroupsForParticipantQueryBuilder($this->getUser());
-    
+
         // Paginate the result
         $groups = $paginator->paginate($query, $request->query->getInt('page', 1), 10);
 
@@ -43,10 +43,10 @@ class GroupController extends AbstractController
 
         $form = $this->createForm(GroupType::class, $group);
         $form->handleRequest($request);
-        $participants = $participantRepository->findBy(['isActive'=>true]);
+        $participants = $participantRepository->findBy(['isActive' => true]);
         if ($form->isSubmitted() && $form->isValid()) {
 
-             // Get the selected members from the hidden input
+            // Get the selected members from the hidden input
             $selectedMembers = explode(',', $request->request->get('selected_members'));
 
             // Process the group creation and add selected members
@@ -56,7 +56,7 @@ class GroupController extends AbstractController
                 if ($member) {
                     $group->addMember($member);
                 }
-            }    
+            }
             $entityManager->persist($group);
             $entityManager->flush();
 

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MainController extends AbstractController
 {
-    #[Route('/', name: 'app_main_index', methods:["GET", "POST"])]
+    #[Route('/', name: 'app_main_index', methods: ["GET", "POST"])]
     public function index(TripRepository $tripRepository, BaseRepository $baseRepository, Request $request, PaginatorInterface $paginator): Response
     {
         if (empty($this->getUser())) {
@@ -64,7 +64,7 @@ class MainController extends AbstractController
         $userId = $user->getId();
         $profilePicturesDir = $this->getParameter('profile_pictures_directory');
         $pictureFilename = 'profilepic' . $userId;
-        
+
         // Check if the file exists in the directory
         $fullPathJpg = $profilePicturesDir . '/' . $pictureFilename . '.jpg';
         $fullPathPng = $profilePicturesDir . '/' . $pictureFilename . '.png';
@@ -75,7 +75,7 @@ class MainController extends AbstractController
         } elseif (file_exists($fullPathPng)) {
             $userProfilePicture = $pictureFilename . '.png';
         }
-    
+
         return $this->render('main/index.html.twig', [
             'pagination' => $paginator->paginate(
                 $tripRepository->findBy(['isArchived' => false]), // The query or query builder to paginate

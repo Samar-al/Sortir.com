@@ -33,15 +33,15 @@ class LocationController extends AbstractController
             'longitude' => $location->getLongitude(),
             'zipCode' => $location->getCity()->getZipCode(),
             'cityId' => $location->getCity()->getId(),
-            'cityName'=> $location->getCity()->getName(),
+            'cityName' => $location->getCity()->getName(),
         ]);
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route('/', name: 'app_location_index', methods: ['GET'])]
+    #[Route(name: 'app_location_index', methods: ['GET'])]
     public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator, TripRepository $tripRepository): Response
     {
-      
+
         $query = $request->query->get('q', '');
 
         if ($query) {
@@ -54,13 +54,12 @@ class LocationController extends AbstractController
 
         $locationsWithTrips = [];
 
-        foreach ($locations as $location)
-        {
+        foreach ($locations as $location) {
             $hasTrip = $tripRepository->count(['location' => $location]) > 0;
             $locationsWithTrips[$location->getId()] = $hasTrip;
         }
 
-         // Paginate the results
+        // Paginate the results
         $pagination = $paginator->paginate(
             $locations, // The query or query builder to paginate
             $request->query->getInt('page', 1), // Current page number, defaults to 1
@@ -86,6 +85,7 @@ class LocationController extends AbstractController
                 $entityManager->persist($location);
                 $entityManager->flush();
 
+                $this->addFlash("success", "Vous avez ajouté un lieu avec succès !");
                 return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
             }
 
@@ -163,7 +163,7 @@ class LocationController extends AbstractController
 
             return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
         }
-       
+
         return $this->render('location/edit.html.twig', [
             'location' => $location,
             'form' => $form,
@@ -174,12 +174,12 @@ class LocationController extends AbstractController
     #[Route('/{id}/supprimer', name: 'app_location_delete', methods: ['POST'])]
     public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$location->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $location->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($location);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
     }
-    
+
 }
