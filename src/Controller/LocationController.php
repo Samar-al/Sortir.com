@@ -38,7 +38,7 @@ class LocationController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route('/', name: 'app_location_index', methods: ['GET'])]
+    #[Route(name: 'app_location_index', methods: ['GET'])]
     public function index(Request $request, LocationRepository $locationRepository, PaginatorInterface $paginator, TripRepository $tripRepository): Response
     {
       
@@ -86,6 +86,7 @@ class LocationController extends AbstractController
                 $entityManager->persist($location);
                 $entityManager->flush();
 
+                $this->addFlash("success", "Vous avez ajouté un lieu avec succès !");
                 return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
             }
 
