@@ -20,7 +20,7 @@ class CityControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->client->loginUser($this->getUserAdmin());
         $this->cityRepository = $this->createMock(CityRepository::class);
-        $this->paginator = $this->createMock(PaginatorInterface::class);
+      
     }
 
     // INDEX route testing
@@ -181,6 +181,6 @@ class CityControllerTest extends WebTestCase
         // Load a user for login (depends on how your User is set up)
         // For example, use the UserRepository to find a user by role or ID
         $userRepository = static::getContainer()->get('doctrine')->getRepository(Participant::class);
-        return $userRepository->findOneBy(['mail'=>'michel.lambert@yahoo.fr']); // Adjust this to your needs
+        return $userRepository->findOneBy(['mail'=>'jerome.fournier@noos.fr']); // Adjust this to your needs
     }
 }

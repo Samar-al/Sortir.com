@@ -28,6 +28,8 @@ class Trip
     private ?string $name = null;
 
     #[Assert\NotBlank(message:"Vous devez entrer une date de début de sortie")]
+    #[Assert\GreaterThan('now', message:"La date de la sortie doit être dans le futur.")]
+    #[Assert\GreaterThan(propertyPath:"dateRegistrationLimit", message:"La date de la sortie doit être après la date limite d'inscription.")]
     #[ORM\Column]
     private ?\DateTimeImmutable $dateHourStart = null;
 
@@ -36,6 +38,7 @@ class Trip
     private ?int $duration = null;
 
     #[Assert\NotBlank(message:"Vous devez entrer une date de limte d'inscription")]
+    #[Assert\GreaterThan('now', message:"La date limite d'inscription doit être dans le futur.")]
     #[ORM\Column]
     private ?\DateTimeImmutable $dateRegistrationLimit = null;
 
