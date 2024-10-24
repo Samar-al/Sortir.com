@@ -40,23 +40,18 @@ class UpdateStatusesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-         // Set the correct timezone for the current time
-        $timezone = new \DateTimeZone('Europe/Paris'); // Adjust this to your timezone
-        $now = new \DateTimeImmutable('now', $timezone);
-
-        // Get trips that need status updates
+        
+        $timezone = new \DateTimeZone('Europe/Paris'); 
+        $now = new \DateTimeImmutable('now', $timezone); 
+        
         $trips = $this->tripRepository->findTripsNeedingStatusUpdate();
 
         foreach ($trips as $trip) {
             $dateHourStart = $trip->getDateHourStart();
+            $dateHourStart = new \DateTimeImmutable($dateHourStart->format('Y-m-d H:i:s'), $timezone);
             $durationInHours = $trip->getDuration(); // Duration is stored as hours
             $dateRegistrationLimit = $trip->getDateRegistrationLimit();
-         
-           
-            // Set timezone for $dateHourStart and $now to ensure they match
-            $dateHourStart->setTimezone($timezone);
-            $dateRegistrationLimit = $trip->getDateRegistrationLimit()->setTimezone(new \DateTimeZone('Europe/Paris'));
-     
+            $dateRegistrationLimit = new \DateTimeImmutable($dateRegistrationLimit->format('Y-m-d H:i:s'), $timezone);
 
             // Calculate the end of the trip by adding the duration to `dateHourStart`
             $dateHourEnd = (clone $dateHourStart)->modify("+{$durationInHours} hours");
@@ -99,10 +94,13 @@ class UpdateStatusesCommand extends Command
                     
                 }
             }
-
-         
+            dump($trip->getId());
+           
+            dump($dateRegistrationLimit);
+            dump($dateHourStart);
+            dump($now);
             // 5. If `dateRegistrationLimit` is reached and the state is not 'closed'
-            if ($dateRegistrationLimit >= $now && $trip->getState()->getLabel() == 'open') {
+            if ($dateRegistrationLimit <= $now && $trip->getState()->getLabel() == 'open') {
                 $closedState = $this->tripRepository->findStateByLabel('closed');
                 if ($closedState) {
                     $trip->setState($closedState);
