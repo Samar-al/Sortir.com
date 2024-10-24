@@ -9,6 +9,12 @@ use App\Repository\CityRepository;
 use App\Event\TripRegistrationEvent;
 use App\Repository\StateRepository;
 use App\Repository\TripRepository;
+use App\Service\TripCancellationService;
+use App\Service\TripCityService;
+use App\Service\TripPublishService;
+use App\Service\TripRegistrationService;
+use App\Service\TripStateService;
+use App\Service\TripUnregisterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,58 +56,16 @@ final class TripController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/ajouter', name: 'app_trip_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, TripCityService $tripCityService, TripStateService $tripStateService): Response
     {
-
         $trip = new Trip();
         $formTrip = $this->createForm(TripType::class, $trip);
         $formTrip->handleRequest($request);
     
-        $cities = $cityRepository->findAll();
-    
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
-            $now = new \DateTime();
+            $tripCityService->updateCity($trip, $request->request->get('city'));
     
-            // Check if dateHourStart is in the future
-            if ($trip->getDateHourStart() <= $now) {
-                $this->addFlash('warning', 'La date de la sortie doit être dans le futur.');
-                return $this->redirectToRoute('app_trip_new');
-            }
-    
-            // Check if dateRegistrationLimit is in the future
-            if ($trip->getDateRegistrationLimit() <= $now) {
-                $this->addFlash('warning', 'La date limite d\'inscription doit être dans le futur.');
-                return $this->redirectToRoute('app_trip_new');
-            }
-    
-            // Check if dateHourStart is after dateRegistrationLimit
-            if ($trip->getDateHourStart() <= $trip->getDateRegistrationLimit()) {
-                $this->addFlash('warning', 'La date de la sortie doit être après la date limite d\'inscription.');
-                return $this->redirectToRoute('app_trip_new');
-            }
-    
-            // Process city
-            $cityId = $request->request->get('city');
-            $city = $cityRepository->find($cityId);
-            if ($city) {
-                $trip->getLocation()->setCity($city);
-            }
-    
-            // Check which button was clicked (Publish or Save)
-            $action = $request->request->get('action');
-            if ($action === 'publish') {
-                // Set state to 'open' if "Publier" was clicked
-                $openState = $stateRepository->findOneBy(['label' => 'open']);
-                if ($openState) {
-                    $trip->setState($openState);
-                }
-            } else {
-                // Set state to 'created' if "Enregistrer" was clicked
-                $defaultState = $stateRepository->findOneBy(['label' => 'created']);
-                if ($defaultState) {
-                    $trip->setState($defaultState);
-                }
-            }
+            $tripStateService->updateStateBasedOnAction($trip, $request->request->get('action'));
     
             $trip->setOrganiser($this->getUser());
             $entityManager->persist($trip);
@@ -110,10 +74,9 @@ final class TripController extends AbstractController
             $this->addFlash('success', 'Vous avez ajouté une sortie avec succès !');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
-
+    
         return $this->render('trip/new.html.twig', [
             'trip' => $trip,
-            'cities' => $cities,
             'formTrip' => $formTrip->createView(),
         ]);
     }
@@ -128,75 +91,45 @@ final class TripController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/modifier', name: 'app_trip_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Trip $trip, EntityManagerInterface $entityManager, CityRepository $cityRepository, StateRepository $stateRepository): Response
+    public function edit(
+        Request $request,
+        Trip $trip,
+        EntityManagerInterface $entityManager,
+        CityRepository $cityRepository,
+        TripStateService $tripStateService,
+        TripCityService $tripCityService // New service for city selection
+    ): Response
     {
         // Block edition if the trip state is not 'created'
-        if ($trip->getState()->getLabel() !== 'created') {
+        if ($tripStateService->cannotEdit($trip)) {
             $this->addFlash('danger', 'Vous ne pouvez pas modifier cette sortie car elle n\'est plus à l\'état "créée".');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
+    
         // Check if the user is the organizer of the trip
         if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $trip->getOrganiser()) {
             throw new ExceptionAccessDeniedException();
         }
-
+    
         $formTrip = $this->createForm(TripType::class, $trip);
         $formTrip->handleRequest($request);
-
+    
         $cities = $cityRepository->findAll();
-
+    
         if ($formTrip->isSubmitted() && $formTrip->isValid()) {
-            $now = new \DateTime();
-
-            // Check if dateHourStart is in the future
-            if ($trip->getDateHourStart() <= $now) {
-                $this->addFlash('warning', 'La date de la sortie doit être dans le futur.');
-                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
-            }
-
-            // Check if dateRegistrationLimit is in the future
-            if ($trip->getDateRegistrationLimit() <= $now) {
-                $this->addFlash('warning', 'La date limite d\'inscription doit être dans le futur.');
-                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
-            }
-
-            // Check if dateHourStart is after dateRegistrationLimit
-            if ($trip->getDateHourStart() <= $trip->getDateRegistrationLimit()) {
-                $this->addFlash('warning', 'La date de la sortie doit être après la date limite d\'inscription.');
-                return $this->redirectToRoute('app_trip_edit', ['id' => $trip->getId()]);
-            }
-
-            // Handle city selection
-            $cityId = $request->request->get('city');
-            $city = $cityRepository->find($cityId);
-            if ($city) {
-                $trip->getLocation()->setCity($city);
-            }
-
+            // Use the city service to handle city selection
+            $tripCityService->updateCity($trip, $request->request->get('city'));
+    
             // Check which button was clicked (Save or Publish)
-            $action = $request->request->get('action');
-            if ($action === 'publish') {
-                // Set state to 'open' if "Publier" was clicked
-                $openState = $stateRepository->findOneBy(['label' => 'open']);
-                if ($openState) {
-                    $trip->setState($openState);
-                }
-            } else {
-                // Set state to 'created' if "Enregistrer" was clicked
-                $defaultState = $stateRepository->findOneBy(['label' => 'created']);
-                if ($defaultState) {
-                    $trip->setState($defaultState);
-                }
-            }
-
+            $tripStateService->updateStateBasedOnAction($trip, $request->request->get('action'));
+    
             // Update the trip details
-            $trip->setOrganiser($this->getUser());
             $entityManager->flush();
-            
+    
             $this->addFlash('success', 'Vous avez modifié la sortie avec succès !');
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
-
+    
         return $this->render('trip/edit.html.twig', [
             'trip' => $trip,
             'cities' => $cities,
@@ -235,38 +168,17 @@ final class TripController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/inscription', name: 'app_trip_register', methods: ['POST'])]
-    public function registerToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
+    public function registerToTrip(Trip $trip, TripRegistrationService $registrationService, EventDispatcherInterface $eventDispatcher): Response
     {
         $user = $this->getUser();
-    
-        // Check if the user is already registered for the trip
-        if ($trip->getParticipants()->contains($user)) {
-            $this->addFlash('warning', 'You are already registered for this trip.');
+
+        if (!$registrationService->canRegister($trip, $user)) {
+            $this->addFlash('warning', 'You cannot register for this trip.');
             return $this->redirectToRoute('app_main_index');
         }
     
-        // Check if the registration deadline has passed
-        if ($trip->getDateRegistrationLimit() < new \DateTimeImmutable()) {
-            $this->addFlash('warning', 'The registration deadline has passed.');
-            return $this->redirectToRoute('app_main_index');
-        }
-    
-        // Check if the number of registrations has reached the maximum
-        if ($trip->getParticipants()->count() >= $trip->getNumMaxRegistration()) {
-            $this->addFlash('warning', 'The trip has reached its maximum number of participants.');
-            return $this->redirectToRoute('app_main_index');
-        }
-    
-        // Check if the trip is open (assuming "open" is a state id or label)
-        if ($trip->getState()->getLabel() !== 'open') {
-            $this->addFlash('warning', 'Registration is not allowed for this trip.');
-            return $this->redirectToRoute('app_main_index');
-        }
-    
-        // Register the user for the trip
-        $trip->addParticipant($user);
-        $entityManager->persist($trip);
-        $entityManager->flush();
+        $registrationService->register($trip, $user);
+        
         // Dispatch the TripRegistrationEvent
         $eventDispatcher->dispatch(new TripRegistrationEvent($trip), TripRegistrationEvent::NAME);
         $this->addFlash('success', 'Vous vous êtes inscrit à la sortie avec succès !');
@@ -275,121 +187,73 @@ final class TripController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/desistement', name: 'app_trip_unregister', methods: ['POST'])]
-    public function unregisterToTrip(Trip $trip, TripRepository $tripRepository, EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): Response
+    public function unregisterToTrip(
+        Trip $trip, 
+        TripUnregisterService $tripUnregisterService
+    ): Response
     {
         $user = $this->getUser();
-
-        // Check if the user is already registered for the trip
-        if (!$trip->getParticipants()->contains($user)) {
-            $this->addFlash('warning', 'You are not registered for this trip.');
-            return $this->redirectToRoute('app_main_index');
-        }
-       
-        if ($trip->getState()->getLabel() !== 'open' && $trip->getState()->getLabel() !== 'closed') {
-            $this->addFlash('warning', 'Unregistration is not allowed for this trip.');
-            return $this->redirectToRoute('app_main_index');
-        }
-
-         // Register the user for the trip
-         $trip->removeParticipant($user);
-         $entityManager->persist($trip);
-         $entityManager->flush();
-
-         // Dispatch the TripUnregistrationEvent
-         $eventDispatcher->dispatch(new TripUnregistrationEvent($trip), TripUnregistrationEvent::NAME);
-         $this->addFlash('success', 'Vous êtes bien désinscrit de la sortie');
-         return $this->redirectToRoute('app_main_index');
-
+        
+        // Call the service and get the result
+        $result = $tripUnregisterService->unregister($trip, $user);
+    
+        // Add flash message
+        $this->addFlash($result['type'], $result['message']);
+    
+        // Redirect to the appropriate route
+        return $this->redirectToRoute($result['redirect']);
     }
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/publier', name: 'app_trip_publish', methods: ['GET'])]
-    public function publishTrip(Trip $trip, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
+    public function publishTrip(Trip $trip, StateRepository $stateRepository, TripPublishService $tripPublishService): Response
     {
         $user = $this->getUser();
     
-        // Check if the user is the organizer
-        if ($trip->getOrganiser() !== $user) {
-            $this->addFlash('warning', 'Vous n\'êtes pas l\'organisateur de cette sortie');
-            return $this->redirectToRoute('app_main_index');
-        }
-
-        // Check if the trip is still in the 'created' state
-        if ($trip->getState()->getLabel() !== 'created') {
-            $this->addFlash('warning', 'Vous ne pouvez pas publier cette sortie');
-            return $this->redirectToRoute('app_main_index');
-        }
-
-        // Check if the trip's dateHourStart or dateRegistrationLimit is in the past
-        $now = new \DateTime();
-        if ($trip->getDateHourStart() <= $now || $trip->getDateRegistrationLimit() <= $now) {
-            $this->addFlash('warning', 'Vous ne pouvez pas publier une sortie dont la date est déjà passée ou pour laquelle la limite d\'inscription est dépassée.');
-            return $this->redirectToRoute('app_main_index');
-        }
-
-        // Set the trip state to 'open'
-        $openState = $stateRepository->findOneBy(['label' => 'open']);
-        $trip->setState($openState);
+       
+        $result = $tripPublishService->handleTripPublication($trip, $user, $stateRepository);
+    
         
-        // Persist changes to the database
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Votre sortie a été publiée avec succès');
-        return $this->redirectToRoute('app_main_index');
-
+        $this->addFlash($result['type'], $result['message']);
+    
+       
+        return $result['redirect'];
     }
+    
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/annuler', name: 'app_trip_cancel', methods: ['GET', 'POST'])]
-    public function cancelTrip(Trip $trip, Request $request, StateRepository $stateRepository, EntityManagerInterface $entityManager): Response
+    public function cancelTrip(Trip $trip, Request $request, TripCancellationService $tripCancellationService): Response
     {
-        // Get the current user
         $user = $this->getUser();
 
-        // Check if the user is the organizer or an admin
-        if ($trip->getOrganiser() !== $user && !$this->isGranted('ROLE_ADMIN')) {
-            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à annuler cette sortie.');
+        // Check if the user is authorized to cancel
+        $canCancelMessage = $tripCancellationService->canCancel($trip, $user);
+        if ($canCancelMessage !== '') {
+            $this->addFlash('danger', $canCancelMessage);
             return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
         }
 
-        // Handle the POST request (form submission)
+        
         if ($request->isMethod('POST')) {
-            // Get the cancellation reason from the form
             $cancellationReason = $request->request->get('cancellation_reason');
 
-            // Check if the reason is provided
-            if (empty($cancellationReason)) {
-                $this->addFlash('warning', 'Veuillez fournir une raison pour l\'annulation.');
-                return $this->redirectToRoute('app_trip_cancel', ['id' => $trip->getId()]);
-            }
-
-            // Find the "cancelled" state from the State repository
-            $cancelledState = $stateRepository->findOneBy(['label' => 'cancelled']);
-
-            // Check if the cancelled state exists
-            if (!$cancelledState) {
-                $this->addFlash('danger', 'L\'état annulé est introuvable.');
+           
+            $cancelMessage = $tripCancellationService->cancel($trip, $cancellationReason);
+            if ($cancelMessage === 'La sortie a été annulée avec succès.') {
+                $this->addFlash('success', $cancelMessage);
                 return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
             }
 
-            // Update the trip's state and cancellation reason
-            $trip->setState($cancelledState);
-            $trip->setReasonCancel($cancellationReason);
-
-            // Persist the changes to the database
-            $entityManager->persist($trip);
-            $entityManager->flush();
-
-            // Add a success flash message
-            $this->addFlash('success', 'La sortie a été annulée avec succès.');
-
-            // Redirect to the trip listing or trip details
-            return $this->redirectToRoute('app_trip_show', ['id' => $trip->getId()]);
+        
+            $this->addFlash('warning', $cancelMessage);
+            return $this->redirectToRoute('app_trip_cancel', ['id' => $trip->getId()]);
         }
+
         return $this->render('trip/cancel.html.twig', [
             'trip' => $trip,
         ]);
     }
-    
+
 
 }
