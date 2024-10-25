@@ -6,6 +6,7 @@ use App\Entity\City;
 use App\Entity\Location;
 use App\Form\CityType;
 use App\Form\LocationType;
+use App\Repository\CityRepository;
 use App\Repository\LocationRepository;
 use App\Repository\TripRepository;
 use App\Service\CityLoaderService;
@@ -74,7 +75,7 @@ class LocationController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/ajouter', name: 'app_location_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, CityLoaderService $cityLoaderService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, CityLoaderService $cityLoaderService, CityRepository $cityRepository): Response
     {
         $location = new Location();
 
@@ -119,8 +120,14 @@ class LocationController extends AbstractController
                 return $this->redirectToRoute('app_location_new', [], Response::HTTP_SEE_OTHER);
             }
 
-            $entityManager->persist($city);
-            $entityManager->flush();
+            $existingCity = $cityRepository->findOneBy(['ZipCode' => $city->getZipCode()]);
+
+            if (!$existingCity) {
+                $entityManager->persist($city);
+                $entityManager->flush();
+            } else {
+                $city = $existingCity;
+            }
 
             $location->setCity($city);
 
